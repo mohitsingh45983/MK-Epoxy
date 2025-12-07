@@ -19,6 +19,9 @@ const reviewSchema = new mongoose.Schema(
     email: {
       type: String,
     },
+    phone: {
+      type: String,
+    },
     verified: {
       type: Boolean,
       default: false,

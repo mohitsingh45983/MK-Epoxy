@@ -33,7 +33,8 @@
     "preview": "vite preview",
     "server": "node server/index.js",
     "create-admin": "node server/scripts/createAdmin.js",
-    "init-pricing": "node server/scripts/initPricing.js"
+    "init-pricing": "node server/scripts/initPricing.js",
+    "init-reviews": "node server/scripts/initReviews.js"
   }
 }
 

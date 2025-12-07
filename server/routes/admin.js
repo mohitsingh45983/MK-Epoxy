@@ -1,6 +1,7 @@
 const express = require('express')
 const ServicePricing = require('../models/ServicePricing')
 const ContactInfo = require('../models/ContactInfo')
+const Review = require('../models/Review')
 const Admin = require('../models/Admin')
 const jwt = require('jsonwebtoken')
 
@@ -216,5 +217,142 @@ router.post('/init-pricing', async (req, res) => {
     })
   }
 })
+
+// Get all reviews (admin only - includes unverified)
+router.get('/reviews', verifyAdmin, async (req, res) => {
+  try {
+    const { verified, search, rating, sortBy = 'createdAt', sortOrder = 'desc' } = req.query
+    
+    let query = {}
+    
+    // Filter by verification status
+    if (verified === 'true') {
+      query.verified = true
+    } else if (verified === 'false') {
+      query.verified = false
+    }
+    
+    // Filter by rating
+    if (rating) {
+      query.rating = parseInt(rating)
+    }
+    
+    // Search by name, email, or text
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } },
+        { text: { $regex: search, $options: 'i' } },
+      ]
+    }
+    
+    const sortOptions = {}
+    sortOptions[sortBy] = sortOrder === 'asc' ? 1 : -1
+    
+    const reviews = await Review.find(query)
+      .sort(sortOptions)
+      .limit(200)
+    
+    // Format dates
+    const formattedReviews = reviews.map((review) => ({
+      _id: review._id,
+      name: review.name,
+      rating: review.rating,
+      text: review.text,
+      email: review.email,
+      phone: review.phone,
+      verified: review.verified,
+      source: review.source,
+      createdAt: review.createdAt,
+      date: formatReviewDate(review.createdAt),
+    }))
+    
+    res.json({ success: true, reviews: formattedReviews })
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching reviews',
+      error: error.message,
+    })
+  }
+})
+
+// Verify/Unverify a review
+router.put('/reviews/:id/verify', verifyAdmin, async (req, res) => {
+  try {
+    const { verified } = req.body
+    const review = await Review.findByIdAndUpdate(
+      req.params.id,
+      { verified: verified === true || verified === 'true' },
+      { new: true }
+    )
+    
+    if (!review) {
+      return res.status(404).json({
+        success: false,
+        message: 'Review not found',
+      })
+    }
+    
+    res.json({
+      success: true,
+      message: `Review ${verified ? 'verified' : 'unverified'} successfully`,
+      review,
+    })
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error updating review',
+      error: error.message,
+    })
+  }
+})
+
+// Delete a review
+router.delete('/reviews/:id', verifyAdmin, async (req, res) => {
+  try {
+    const review = await Review.findByIdAndDelete(req.params.id)
+    
+    if (!review) {
+      return res.status(404).json({
+        success: false,
+        message: 'Review not found',
+      })
+    }
+    
+    res.json({
+      success: true,
+      message: 'Review deleted successfully',
+    })
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error deleting review',
+      error: error.message,
+    })
+  }
+})
+
+// Helper function to format review date
+function formatReviewDate(date) {
+  const now = new Date()
+  const reviewDate = new Date(date)
+  const diffTime = Math.abs(now - reviewDate)
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+  
+  if (diffDays === 0) return 'Today'
+  if (diffDays === 1) return 'Yesterday'
+  if (diffDays < 7) return `${diffDays} days ago`
+  if (diffDays < 30) {
+    const weeks = Math.floor(diffDays / 7)
+    return `${weeks} ${weeks === 1 ? 'week' : 'weeks'} ago`
+  }
+  if (diffDays < 365) {
+    const months = Math.floor(diffDays / 30)
+    return `${months} ${months === 1 ? 'month' : 'months'} ago`
+  }
+  const years = Math.floor(diffDays / 365)
+  return `${years} ${years === 1 ? 'year' : 'years'} ago`
+}
 
 module.exports = router
