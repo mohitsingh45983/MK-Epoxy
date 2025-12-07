@@ -1,13 +1,32 @@
+import { useState, useEffect } from 'react'
 import { FaWhatsapp } from 'react-icons/fa'
 import { motion } from 'framer-motion'
+import axios from 'axios'
 
 const WhatsAppButton = () => {
-  const phoneNumber = '917339723912'
+  const [whatsappNumber, setWhatsappNumber] = useState('917339723912')
+
+  useEffect(() => {
+    fetchContactInfo()
+  }, [])
+
+  const fetchContactInfo = async () => {
+    try {
+      const response = await axios.get('/api/contact-info')
+      if (response.data.success && response.data.contactInfo.whatsapp) {
+        setWhatsappNumber(response.data.contactInfo.whatsapp)
+      }
+    } catch (error) {
+      console.error('Error fetching contact info:', error)
+      // Use default if API fails
+    }
+  }
+
   const message = 'Hello! I would like to know more about your services.'
 
   const handleClick = () => {
     window.open(
-      `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`,
+      `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`,
       '_blank'
     )
   }
@@ -31,4 +50,3 @@ const WhatsAppButton = () => {
 }
 
 export default WhatsAppButton
-

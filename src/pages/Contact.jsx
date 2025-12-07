@@ -1,38 +1,111 @@
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { FiPhone, FiMail, FiMapPin, FiClock } from 'react-icons/fi'
 import { FaWhatsapp } from 'react-icons/fa'
+import axios from 'axios'
 
 const Contact = () => {
-  const contactInfo = [
+  const [contactInfo, setContactInfo] = useState(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetchContactInfo()
+  }, [])
+
+  const fetchContactInfo = async () => {
+    try {
+      const response = await axios.get('/api/contact-info')
+      if (response.data.success) {
+        setContactInfo(response.data.contactInfo)
+      }
+    } catch (error) {
+      console.error('Error fetching contact info:', error)
+      // Use default values if API fails
+      setContactInfo({
+        phone: '+91 73397 23912',
+        whatsapp: '917339723912',
+        email: 'info@mkepoxy.com',
+        alternateEmail: 'support@mkepoxy.com',
+        address: {
+          street: 'Your Business Address',
+          city: 'City',
+          state: 'State',
+          pincode: 'PIN Code',
+          country: 'India',
+        },
+        workingHours: {
+          weekdays: 'Monday - Saturday: 9:00 AM - 7:00 PM',
+          weekend: 'Sunday: Closed',
+        },
+        socialMedia: {
+          facebook: '',
+          instagram: '',
+          linkedin: '',
+        },
+        googleMapsUrl: '',
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (loading || !contactInfo) {
+    return (
+      <div className="pt-20 min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600 dark:text-gray-400">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
+  const fullAddress = [
+    contactInfo.address?.street,
+    contactInfo.address?.city,
+    contactInfo.address?.state,
+    contactInfo.address?.pincode,
+    contactInfo.address?.country,
+  ]
+    .filter(Boolean)
+    .join(', ')
+
+  const contactInfoList = [
     {
       icon: <FiPhone className="text-3xl" />,
       title: 'Phone',
-      details: ['+91 73397 23912'],
-      link: 'tel:+917339723912',
+      details: [contactInfo.phone],
+      link: `tel:${contactInfo.phone.replace(/\s/g, '')}`,
     },
     {
       icon: <FaWhatsapp className="text-3xl" />,
       title: 'WhatsApp',
-      details: ['+91 73397 23912'],
-      link: 'https://wa.me/917339723912',
+      details: [contactInfo.phone],
+      link: `https://wa.me/${contactInfo.whatsapp}`,
       isExternal: true,
     },
     {
       icon: <FiMail className="text-3xl" />,
       title: 'Email',
-      details: ['info@mkepoxy.com', 'support@mkepoxy.com'],
-      link: 'mailto:info@mkepoxy.com',
+      details: [
+        contactInfo.email,
+        ...(contactInfo.alternateEmail ? [contactInfo.alternateEmail] : []),
+      ],
+      link: `mailto:${contactInfo.email}`,
     },
     {
       icon: <FiMapPin className="text-3xl" />,
       title: 'Address',
-      details: ['Your Business Address', 'City, State - PIN Code', 'India'],
+      details: fullAddress ? [fullAddress] : ['Address not set'],
       link: null,
     },
     {
       icon: <FiClock className="text-3xl" />,
       title: 'Working Hours',
-      details: ['Monday - Saturday: 9:00 AM - 7:00 PM', 'Sunday: Closed'],
+      details: [
+        contactInfo.workingHours?.weekdays || 'Monday - Saturday: 9:00 AM - 7:00 PM',
+        contactInfo.workingHours?.weekend || 'Sunday: Closed',
+      ],
       link: null,
     },
   ]
@@ -60,7 +133,7 @@ const Contact = () => {
       <section className="section-padding">
         <div className="container-custom">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-            {contactInfo.map((info, index) => (
+            {contactInfoList.map((info, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 30 }}
@@ -116,22 +189,30 @@ const Contact = () => {
           </motion.div>
 
           <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg overflow-hidden">
-            <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3503.365715381123!2d77.20902231440647!3d28.61307118243024!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390ce2a0e5c5b5b5%3A0x5b5b5b5b5b5b5b5b!2sNew%20Delhi%2C%20Delhi!5e0!3m2!1sen!2sin!4v1234567890123!5m2!1sen!2sin"
-              width="100%"
-              height="450"
-              style={{ border: 0 }}
-              allowFullScreen=""
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              className="w-full"
-              title="Business Location"
-            ></iframe>
+            {contactInfo.googleMapsUrl ? (
+              <iframe
+                src={contactInfo.googleMapsUrl}
+                width="100%"
+                height="450"
+                style={{ border: 0 }}
+                allowFullScreen=""
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                className="w-full"
+                title="Business Location"
+              ></iframe>
+            ) : (
+              <div className="h-96 flex items-center justify-center bg-gray-200 dark:bg-gray-700">
+                <p className="text-gray-500 dark:text-gray-400">
+                  Map location not configured. Please add Google Maps URL in admin dashboard.
+                </p>
+              </div>
+            )}
           </div>
 
           <div className="mt-8 text-center">
             <a
-              href="https://maps.google.com/?q=Your+Business+Address"
+              href={`https://maps.google.com/?q=${encodeURIComponent(fullAddress)}`}
               target="_blank"
               rel="noopener noreferrer"
               className="btn-primary inline-block"
@@ -159,14 +240,14 @@ const Contact = () => {
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <a
-                href="tel:+917339723912"
+                href={`tel:${contactInfo.phone.replace(/\s/g, '')}`}
                 className="bg-white text-primary-600 font-semibold py-3 px-8 rounded-lg hover:bg-primary-50 transition-colors inline-flex items-center space-x-2"
               >
                 <FiPhone />
                 <span>Call Now</span>
               </a>
               <a
-                href="https://wa.me/917339723912"
+                href={`https://wa.me/${contactInfo.whatsapp}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-[#25D366] hover:bg-[#20BA5A] text-white font-semibold py-3 px-8 rounded-lg transition-colors inline-flex items-center space-x-2"

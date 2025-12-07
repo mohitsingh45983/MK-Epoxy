@@ -1,8 +1,60 @@
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { FiPhone, FiMail, FiMapPin, FiClock, FiLock } from 'react-icons/fi'
 import { FaWhatsapp, FaFacebook, FaInstagram, FaLinkedin } from 'react-icons/fa'
+import axios from 'axios'
 
 const Footer = () => {
+  const [contactInfo, setContactInfo] = useState(null)
+
+  useEffect(() => {
+    fetchContactInfo()
+  }, [])
+
+  const fetchContactInfo = async () => {
+    try {
+      const response = await axios.get('/api/contact-info')
+      if (response.data.success) {
+        setContactInfo(response.data.contactInfo)
+      }
+    } catch (error) {
+      console.error('Error fetching contact info:', error)
+      // Use default values if API fails
+      setContactInfo({
+        phone: '+91 73397 23912',
+        email: 'info@mkepoxy.com',
+        address: {
+          street: 'Your Business Address',
+          city: 'City',
+          state: 'State',
+          pincode: 'PIN Code',
+          country: 'India',
+        },
+        workingHours: {
+          weekdays: 'Monday - Saturday: 9:00 AM - 7:00 PM',
+        },
+        socialMedia: {
+          facebook: '',
+          instagram: '',
+          linkedin: '',
+        },
+      })
+    }
+  }
+
+  if (!contactInfo) {
+    return null // Don't render footer until contact info is loaded
+  }
+
+  const fullAddress = [
+    contactInfo.address?.street,
+    contactInfo.address?.city,
+    contactInfo.address?.state,
+    contactInfo.address?.pincode,
+  ]
+    .filter(Boolean)
+    .join(', ')
+
   return (
     <footer className="bg-gray-900 dark:bg-black text-gray-300">
       <div className="container-custom section-padding">
@@ -22,24 +74,36 @@ const Footer = () => {
               of experience. Quality guaranteed.
             </p>
             <div className="flex space-x-4">
-              <a
-                href="#"
-                className="text-2xl hover:text-primary-400 transition-colors"
-              >
-                <FaFacebook />
-              </a>
-              <a
-                href="#"
-                className="text-2xl hover:text-primary-400 transition-colors"
-              >
-                <FaInstagram />
-              </a>
-              <a
-                href="#"
-                className="text-2xl hover:text-primary-400 transition-colors"
-              >
-                <FaLinkedin />
-              </a>
+              {contactInfo.socialMedia?.facebook && (
+                <a
+                  href={contactInfo.socialMedia.facebook}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-2xl hover:text-primary-400 transition-colors"
+                >
+                  <FaFacebook />
+                </a>
+              )}
+              {contactInfo.socialMedia?.instagram && (
+                <a
+                  href={contactInfo.socialMedia.instagram}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-2xl hover:text-primary-400 transition-colors"
+                >
+                  <FaInstagram />
+                </a>
+              )}
+              {contactInfo.socialMedia?.linkedin && (
+                <a
+                  href={contactInfo.socialMedia.linkedin}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-2xl hover:text-primary-400 transition-colors"
+                >
+                  <FaLinkedin />
+                </a>
+              )}
             </div>
           </div>
 
@@ -109,19 +173,22 @@ const Footer = () => {
             <ul className="space-y-3">
               <li className="flex items-start space-x-3">
                 <FiPhone className="mt-1 text-primary-400" />
-                <span>+91 73397 23912</span>
+                <span>{contactInfo.phone}</span>
               </li>
               <li className="flex items-start space-x-3">
                 <FiMail className="mt-1 text-primary-400" />
-                <span>info@mkepoxy.com</span>
+                <span>{contactInfo.email}</span>
               </li>
               <li className="flex items-start space-x-3">
                 <FiMapPin className="mt-1 text-primary-400" />
-                <span>Your Business Address, City, State - PIN</span>
+                <span>{fullAddress || 'Address not set'}</span>
               </li>
               <li className="flex items-start space-x-3">
                 <FiClock className="mt-1 text-primary-400" />
-                <span>Mon - Sat: 9:00 AM - 7:00 PM</span>
+                <span>
+                  {contactInfo.workingHours?.weekdays ||
+                    'Mon - Sat: 9:00 AM - 7:00 PM'}
+                </span>
               </li>
             </ul>
           </div>
@@ -147,4 +214,3 @@ const Footer = () => {
 }
 
 export default Footer
-

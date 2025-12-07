@@ -1,10 +1,32 @@
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { FiPhone, FiFileText } from 'react-icons/fi'
 import { FaWhatsapp as FaWhatsappSolid } from 'react-icons/fa'
 import { FiCheckCircle, FiAward, FiUsers } from 'react-icons/fi'
+import axios from 'axios'
 
 const Home = () => {
+  const [contactInfo, setContactInfo] = useState({
+    phone: '+91 73397 23912',
+    whatsapp: '917339723912',
+  })
+
+  useEffect(() => {
+    fetchContactInfo()
+  }, [])
+
+  const fetchContactInfo = async () => {
+    try {
+      const response = await axios.get('/api/contact-info')
+      if (response.data.success) {
+        setContactInfo(response.data.contactInfo)
+      }
+    } catch (error) {
+      console.error('Error fetching contact info:', error)
+    }
+  }
+
   const highlights = [
     {
       icon: <FiAward className="text-4xl" />,
@@ -64,7 +86,7 @@ const Home = () => {
             {/* CTA Buttons */}
             <div className="flex flex-wrap justify-center gap-4">
               <motion.a
-                href="tel:+917339723912"
+                href={`tel:${contactInfo.phone.replace(/\s/g, '')}`}
                 className="btn-primary flex items-center space-x-2"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -73,7 +95,7 @@ const Home = () => {
                 <span>Call Now</span>
               </motion.a>
               <motion.a
-                href="https://wa.me/917339723912"
+                href={`https://wa.me/${contactInfo.whatsapp}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-[#25D366] hover:bg-[#20BA5A] text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center space-x-2"

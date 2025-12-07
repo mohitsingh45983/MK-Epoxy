@@ -1,5 +1,6 @@
 const express = require('express')
 const ServicePricing = require('../models/ServicePricing')
+const ContactInfo = require('../models/ContactInfo')
 const Admin = require('../models/Admin')
 const jwt = require('jsonwebtoken')
 
@@ -10,11 +11,16 @@ const verifyAdmin = (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1]
 
   if (!token) {
-    return res.status(401).json({ success: false, message: 'No token provided' })
+    return res
+      .status(401)
+      .json({ success: false, message: 'No token provided' })
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key')
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET || 'your-secret-key'
+    )
     req.adminId = decoded.adminId
     next()
   } catch (error) {
@@ -137,6 +143,47 @@ router.post('/pricing', verifyAdmin, async (req, res) => {
   }
 })
 
+// Get contact information
+router.get('/contact', verifyAdmin, async (req, res) => {
+  try {
+    const contactInfo = await ContactInfo.getContactInfo()
+    res.json({ success: true, contactInfo })
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching contact information',
+      error: error.message,
+    })
+  }
+})
+
+// Update contact information
+router.put('/contact', verifyAdmin, async (req, res) => {
+  try {
+    let contactInfo = await ContactInfo.findOne()
+
+    if (!contactInfo) {
+      contactInfo = new ContactInfo(req.body)
+      await contactInfo.save()
+    } else {
+      Object.assign(contactInfo, req.body)
+      await contactInfo.save()
+    }
+
+    res.json({
+      success: true,
+      message: 'Contact information updated successfully',
+      contactInfo,
+    })
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error updating contact information',
+      error: error.message,
+    })
+  }
+})
+
 // Initialize default pricing (public endpoint - run once to set up initial data)
 router.post('/init-pricing', async (req, res) => {
   try {
@@ -171,4 +218,3 @@ router.post('/init-pricing', async (req, res) => {
 })
 
 module.exports = router
-
