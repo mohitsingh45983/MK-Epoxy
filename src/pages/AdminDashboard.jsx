@@ -281,16 +281,16 @@ const AdminDashboard = () => {
             transition={{ delay: 0.2 }}
             className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden"
           >
-            <div className="overflow-x-auto">
-              <table className="w-full">
+            <div className="overflow-x-auto -mx-4 sm:mx-0">
+              <table className="w-full min-w-[640px]">
                 <thead className="bg-primary-600 text-white">
                   <tr>
-                    <th className="px-6 py-4 text-left font-semibold">Service</th>
-                    <th className="px-6 py-4 text-left font-semibold">
+                    <th className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 text-left font-semibold text-sm sm:text-base">Service</th>
+                    <th className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 text-left font-semibold text-sm sm:text-base">
                       Price per sqft (₹)
                     </th>
-                    <th className="px-6 py-4 text-left font-semibold">Status</th>
-                    <th className="px-6 py-4 text-center font-semibold">
+                    <th className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 text-left font-semibold text-sm sm:text-base">Status</th>
+                    <th className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 text-center font-semibold text-sm sm:text-base">
                       Actions
                     </th>
                   </tr>
@@ -304,10 +304,10 @@ const AdminDashboard = () => {
                       transition={{ delay: index * 0.1 }}
                       className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
                     >
-                      <td className="px-6 py-4 font-medium">
+                      <td className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 font-medium text-sm sm:text-base">
                         {service.serviceName}
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-3 sm:px-4 md:px-6 py-3 sm:py-4">
                         {editingId === service._id ? (
                           <input
                             type="number"
@@ -320,7 +320,7 @@ const AdminDashboard = () => {
                                 pricePerSqft: parseFloat(e.target.value),
                               })
                             }
-                            className="w-32 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-primary-500"
+                            className="w-24 sm:w-32 px-2 sm:px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-primary-500 text-sm sm:text-base"
                           />
                         ) : (
                           <span className="flex items-center space-x-2">
@@ -331,7 +331,7 @@ const AdminDashboard = () => {
                           </span>
                         )}
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-3 sm:px-4 md:px-6 py-3 sm:py-4">
                         {editingId === service._id ? (
                           <select
                             value={editValues.isActive}
@@ -341,7 +341,7 @@ const AdminDashboard = () => {
                                 isActive: e.target.value === 'true',
                               })
                             }
-                            className="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-primary-500"
+                            className="px-2 sm:px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-primary-500 text-sm sm:text-base"
                           >
                             <option value="true">Active</option>
                             <option value="false">Inactive</option>
@@ -358,8 +358,8 @@ const AdminDashboard = () => {
                           </span>
                         )}
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="flex justify-center space-x-2">
+                      <td className="px-3 sm:px-4 md:px-6 py-3 sm:py-4">
+                        <div className="flex justify-center space-x-1 sm:space-x-2">
                           {editingId === service._id ? (
                             <>
                               <button
@@ -403,7 +403,7 @@ const AdminDashboard = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8"
+            className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6 md:p-8"
           >
             {!contactInfo && (
               <div className="mb-6 p-4 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-lg">
@@ -427,7 +427,7 @@ const AdminDashboard = () => {
                         phone: e.target.value,
                       })
                     }
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-primary-500"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-primary-500 text-sm sm:text-base"
                   />
                 </div>
                 <div>
@@ -444,7 +444,7 @@ const AdminDashboard = () => {
                         whatsapp: e.target.value,
                       })
                     }
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-primary-500"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-primary-500 text-sm sm:text-base"
                     placeholder="917339723912"
                   />
                 </div>
@@ -466,7 +466,7 @@ const AdminDashboard = () => {
                         email: e.target.value,
                       })
                     }
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-primary-500"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-primary-500 text-sm sm:text-base"
                   />
                 </div>
                 <div>
@@ -483,7 +483,7 @@ const AdminDashboard = () => {
                         alternateEmail: e.target.value,
                       })
                     }
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-primary-500"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-primary-500 text-sm sm:text-base"
                   />
                 </div>
               </div>
@@ -494,7 +494,7 @@ const AdminDashboard = () => {
                   <FiMapPin className="mr-2" />
                   Address
                 </label>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <input
                     type="text"
                     placeholder="Street Address"
@@ -592,7 +592,7 @@ const AdminDashboard = () => {
                         },
                       })
                     }
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-primary-500"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-primary-500 text-sm sm:text-base"
                   />
                 </div>
                 <div>
@@ -612,7 +612,7 @@ const AdminDashboard = () => {
                         },
                       })
                     }
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-primary-500"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-primary-500 text-sm sm:text-base"
                   />
                 </div>
               </div>
@@ -623,7 +623,7 @@ const AdminDashboard = () => {
                   <FiGlobe className="mr-2" />
                   Social Media Links
                 </label>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
                   <input
                     type="url"
                     placeholder="Facebook URL"

@@ -49,11 +49,11 @@ const AdminLogin = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl p-8 md:p-12 w-full max-w-md"
+        className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl p-6 sm:p-8 md:p-12 w-full max-w-md mx-4"
       >
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold mb-2">Admin Login</h1>
-          <p className="text-gray-600 dark:text-gray-400">
+        <div className="text-center mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold mb-2">Admin Login</h1>
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
             Access the admin dashboard
           </p>
         </div>

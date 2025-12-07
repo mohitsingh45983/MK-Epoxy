@@ -140,12 +140,12 @@ const Contact = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
-                className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow"
+                className="bg-white dark:bg-gray-900 p-4 sm:p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow"
               >
-                <div className="text-primary-600 dark:text-primary-400 mb-4">
+                <div className="text-primary-600 dark:text-primary-400 mb-3 sm:mb-4">
                   {info.icon}
                 </div>
-                <h3 className="text-xl font-bold mb-3">{info.title}</h3>
+                <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3">{info.title}</h3>
                 <div className="space-y-1">
                   {info.details.map((detail, detailIndex) => (
                     <p
@@ -182,8 +182,8 @@ const Contact = () => {
             transition={{ duration: 0.6 }}
             className="text-center mb-8"
           >
-            <h2 className="text-4xl font-bold mb-4">Find Us</h2>
-            <p className="text-lg text-gray-600 dark:text-gray-400">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-3 sm:mb-4">Find Us</h2>
+            <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400">
               Visit our office or get directions
             </p>
           </motion.div>

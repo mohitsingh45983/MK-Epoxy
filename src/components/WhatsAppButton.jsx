@@ -41,8 +41,8 @@ const WhatsAppButton = () => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 1 }}
     >
-      <FaWhatsapp className="text-3xl" />
-      <span className="absolute right-full mr-3 bg-gray-900 text-white px-4 py-2 rounded-lg text-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
+      <FaWhatsapp className="text-2xl sm:text-3xl" />
+      <span className="hidden sm:block absolute right-full mr-3 bg-gray-900 text-white px-4 py-2 rounded-lg text-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
         Chat on WhatsApp
       </span>
     </motion.button>

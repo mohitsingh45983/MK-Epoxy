@@ -233,7 +233,7 @@ const Quotation = () => {
                     required
                     value={formData.name}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm sm:text-base"
                     placeholder="John Doe"
                   />
                 </div>
@@ -252,7 +252,7 @@ const Quotation = () => {
                     required
                     value={formData.phone}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm sm:text-base"
                     placeholder="+91 73397 23912"
                   />
                 </div>
@@ -310,7 +310,7 @@ const Quotation = () => {
                     required
                     value={formData.service}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm sm:text-base"
                   >
                     <option value="">Select a service</option>
                     {services.map((service) => (
@@ -336,7 +336,7 @@ const Quotation = () => {
                     min="1"
                     value={formData.area}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm sm:text-base"
                     placeholder="1000"
                   />
                 </div>
@@ -417,7 +417,7 @@ const Quotation = () => {
                 disabled={isSubmitting}
                 className="w-full btn-primary text-lg py-4 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isSubmitting ? 'Submitting...' : 'Get Estimate in 5 Minutes'}
+                {isSubmitting ? 'Submitting...' : 'Get Estimate'}
               </button>
 
               <p className="text-sm text-center text-gray-500 dark:text-gray-400">

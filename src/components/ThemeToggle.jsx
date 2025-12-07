@@ -5,7 +5,7 @@ const ThemeToggle = ({ darkMode, setDarkMode }) => {
   return (
     <motion.button
       onClick={() => setDarkMode(!darkMode)}
-      className="fixed top-24 right-6 z-50 bg-white dark:bg-gray-800 p-3 rounded-full shadow-lg border border-gray-200 dark:border-gray-700"
+      className="fixed top-20 sm:top-24 right-4 sm:right-6 z-50 bg-white dark:bg-gray-800 p-2 sm:p-3 rounded-full shadow-lg border border-gray-200 dark:border-gray-700"
       whileHover={{ scale: 1.1 }}
       whileTap={{ scale: 0.9 }}
       initial={{ opacity: 0, x: 20 }}

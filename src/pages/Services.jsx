@@ -160,10 +160,10 @@ const Services = () => {
             transition={{ duration: 0.8 }}
             className="text-center"
           >
-            <h1 className="text-5xl md:text-6xl font-bold mb-6">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6">
               Our Services
             </h1>
-            <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
+            <p className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto px-4">
               Comprehensive solutions for all your flooring and waterproofing
               needs
             </p>
@@ -181,22 +181,22 @@ const Services = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className={`mb-16 ${
+              className={`mb-12 md:mb-16 ${
                 index % 2 === 0 ? '' : 'lg:flex-row-reverse'
-              } lg:flex items-center gap-12`}
+              } lg:flex items-center gap-8 lg:gap-12`}
             >
               <div
-                className={`flex-1 ${
+                className={`flex-1 mb-6 lg:mb-0 ${
                   index % 2 === 0 ? 'lg:order-1' : 'lg:order-2'
                 }`}
               >
-                <div className="grid grid-cols-2 gap-4 mb-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-6">
                   {service.images.map((img, imgIndex) => (
                     <img
                       key={imgIndex}
                       src={img}
                       alt={`${service.title} ${imgIndex + 1}`}
-                      className="rounded-lg shadow-lg object-cover h-48 w-full"
+                      className="rounded-lg shadow-lg object-cover h-40 sm:h-48 w-full"
                     />
                   ))}
                 </div>

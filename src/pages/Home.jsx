@@ -162,13 +162,13 @@ const Home = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: index * 0.2 }}
-                className="bg-white dark:bg-gray-900 p-8 rounded-xl shadow-lg hover:shadow-2xl transition-shadow text-center"
+                className="bg-white dark:bg-gray-900 p-6 sm:p-8 rounded-xl shadow-lg hover:shadow-2xl transition-shadow text-center"
               >
-                <div className="text-primary-600 dark:text-primary-400 mb-4 flex justify-center">
+                <div className="text-primary-600 dark:text-primary-400 mb-3 sm:mb-4 flex justify-center">
                   {highlight.icon}
                 </div>
-                <h3 className="text-2xl font-bold mb-3">{highlight.title}</h3>
-                <p className="text-gray-600 dark:text-gray-400">
+                <h3 className="text-xl sm:text-2xl font-bold mb-2 sm:mb-3">{highlight.title}</h3>
+                <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
                   {highlight.description}
                 </p>
               </motion.div>

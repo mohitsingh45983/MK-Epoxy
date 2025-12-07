@@ -93,14 +93,14 @@ const Reviews = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl p-8 md:p-12 max-w-4xl mx-auto text-center"
+            className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl p-6 sm:p-8 md:p-12 max-w-4xl mx-auto text-center"
           >
-            <div className="flex items-center justify-center mb-4">
-              <FaGoogle className="text-4xl text-primary-600 dark:text-primary-400 mr-4" />
+            <div className="flex flex-col sm:flex-row items-center justify-center mb-4 gap-4">
+              <FaGoogle className="text-3xl sm:text-4xl text-primary-600 dark:text-primary-400" />
               <div>
-                <div className="text-5xl font-bold mb-2">{averageRating}</div>
+                <div className="text-4xl sm:text-5xl font-bold mb-2">{averageRating}</div>
                 <div className="flex justify-center mb-2">{renderStars(5)}</div>
-                <div className="text-gray-600 dark:text-gray-400">
+                <div className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
                   Based on {totalReviews} Google Reviews
                 </div>
               </div>
