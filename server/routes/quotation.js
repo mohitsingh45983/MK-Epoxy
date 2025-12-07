@@ -3,6 +3,7 @@ const multer = require('multer')
 const path = require('path')
 const fs = require('fs')
 const Quotation = require('../models/Quotation')
+const ServicePricing = require('../models/ServicePricing')
 const nodemailer = require('nodemailer')
 
 const router = express.Router()
@@ -44,20 +45,17 @@ const upload = multer({
   },
 })
 
-// Pricing per sqft for each service (in INR)
-const servicePricing = {
-  'Epoxy Flooring': 80, // per sqft
-  Waterproofing: 60, // per sqft
-  'PU Flooring': 100, // per sqft
-  'Industrial Coating': 120, // per sqft
-  'Crack Filling': 40, // per sqft
-  'Expansion Joint Treatment': 50, // per sqft
-}
-
 // Calculate quotation estimate
-function calculateEstimate(service, area) {
+async function calculateEstimate(service, area) {
   const areaNum = parseFloat(area) || 0
-  const basePrice = servicePricing[service] || 80
+  
+  // Get pricing from database
+  const servicePricing = await ServicePricing.findOne({
+    serviceName: service,
+    isActive: true,
+  })
+  
+  const basePrice = servicePricing ? servicePricing.pricePerSqft : 80
   const subtotal = areaNum * basePrice
 
   // Add 10% for labor and materials overhead
@@ -90,7 +88,7 @@ router.post('/', upload.array('images', 5), async (req, res) => {
       : []
 
     // Calculate estimate
-    const estimate = calculateEstimate(service, area)
+    const estimate = await calculateEstimate(service, area)
 
     const quotation = new Quotation({
       name,

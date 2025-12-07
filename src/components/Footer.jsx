@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { FiPhone, FiMail, FiMapPin, FiClock } from 'react-icons/fi'
+import { FiPhone, FiMail, FiMapPin, FiClock, FiLock } from 'react-icons/fi'
 import { FaWhatsapp, FaFacebook, FaInstagram, FaLinkedin } from 'react-icons/fa'
 
 const Footer = () => {
@@ -127,10 +127,19 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm">
-          <p>
-            &copy; {new Date().getFullYear()} MK Epoxy. All rights reserved.
-          </p>
+        <div className="border-t border-gray-800 mt-8 pt-8">
+          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+            <p className="text-sm">
+              &copy; {new Date().getFullYear()} MK Epoxy. All rights reserved.
+            </p>
+            <Link
+              to="/admin/login"
+              className="flex items-center space-x-2 text-sm text-gray-400 hover:text-primary-400 transition-colors"
+            >
+              <FiLock className="text-sm" />
+              <span>Login as Admin</span>
+            </Link>
+          </div>
         </div>
       </div>
     </footer>

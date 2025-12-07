@@ -28,6 +28,7 @@ mongoose
 app.use('/api/quotation', require('./routes/quotation'))
 app.use('/api/reviews', require('./routes/reviews'))
 app.use('/api/contact', require('./routes/contact'))
+app.use('/api/admin', require('./routes/admin'))
 
 // Health check
 app.get('/api/health', (req, res) => {
