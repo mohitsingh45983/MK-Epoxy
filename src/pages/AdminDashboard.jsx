@@ -16,6 +16,9 @@ import {
   FiTrash2,
   FiSearch,
   FiChevronDown,
+  FiImage,
+  FiUpload,
+  FiLayers,
 } from 'react-icons/fi'
 import { FaStar } from 'react-icons/fa'
 import axios from 'axios'
@@ -63,6 +66,22 @@ const AdminDashboard = () => {
     sortBy: 'createdAt',
     sortOrder: 'desc',
   })
+  // Gallery state
+  const [galleryImages, setGalleryImages] = useState([])
+  const [beforeAfterItems, setBeforeAfterItems] = useState([])
+  const [galleryLoading, setGalleryLoading] = useState(false)
+  const [galleryForm, setGalleryForm] = useState({
+    title: '',
+    description: '',
+    image: null,
+  })
+  const [beforeAfterForm, setBeforeAfterForm] = useState({
+    title: '',
+    description: '',
+    before: null,
+    after: null,
+  })
+  const [galleryPage, setGalleryPage] = useState(1)
 
   useEffect(() => {
     // Check if admin is logged in
@@ -82,6 +101,9 @@ const AdminDashboard = () => {
   useEffect(() => {
     if (activeTab === 'reviews') {
       fetchReviews()
+    }
+    if (activeTab === 'gallery') {
+      fetchGallery()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -216,29 +238,31 @@ const AdminDashboard = () => {
         url: error.config?.url,
         method: error.config?.method,
       })
-      
+
       if (error.response?.status === 401) {
         localStorage.removeItem('adminToken')
         localStorage.removeItem('adminUser')
         navigate('/admin/login')
         return
       }
-      
+
       // Show detailed error message
       let errorMessage = 'Failed to fetch reviews'
       if (error.response) {
         // Server responded with error
-        errorMessage = error.response.data?.message || 
-                      error.response.data?.error || 
-                      `Server error: ${error.response.status} ${error.response.statusText}`
+        errorMessage =
+          error.response.data?.message ||
+          error.response.data?.error ||
+          `Server error: ${error.response.status} ${error.response.statusText}`
       } else if (error.request) {
         // Request made but no response (server not running or network issue)
-        errorMessage = 'Cannot connect to server. Please make sure the server is running on port 5000.'
+        errorMessage =
+          'Cannot connect to server. Please make sure the server is running on port 5000.'
       } else {
         // Error in request setup
         errorMessage = error.message || 'Failed to fetch reviews'
       }
-      
+
       setMessage({
         type: 'error',
         text: errorMessage,
@@ -248,6 +272,190 @@ const AdminDashboard = () => {
       setReviewsLoading(false)
     }
   }
+
+  const fetchGallery = async () => {
+    setGalleryLoading(true)
+    try {
+      const token = localStorage.getItem('adminToken')
+      if (!token) {
+        navigate('/admin/login')
+        return
+      }
+
+      const [imagesRes, beforeAfterRes] = await Promise.all([
+        axios.get('/api/admin/gallery/images', {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        axios.get('/api/admin/gallery/before-after', {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      ])
+
+      if (imagesRes.data.success) {
+        setGalleryImages(imagesRes.data.images || [])
+      }
+      if (beforeAfterRes.data.success) {
+        setBeforeAfterItems(beforeAfterRes.data.items || [])
+      }
+    } catch (error) {
+      setMessage({
+        type: 'error',
+        text:
+          error.response?.data?.message ||
+          'Failed to load gallery. Please try again.',
+      })
+    } finally {
+      setGalleryLoading(false)
+    }
+  }
+
+  const handleGalleryUpload = async (e) => {
+    e.preventDefault()
+    if (!galleryForm.image) {
+      setMessage({
+        type: 'error',
+        text: 'Please select an image to upload.',
+      })
+      return
+    }
+
+    setGalleryLoading(true)
+    try {
+      const token = localStorage.getItem('adminToken')
+      const formData = new FormData()
+      formData.append('title', galleryForm.title)
+      formData.append('description', galleryForm.description)
+      formData.append('image', galleryForm.image)
+
+      const res = await axios.post('/api/admin/gallery/images', formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      })
+
+      if (res.data.success) {
+        setMessage({ type: 'success', text: 'Image uploaded successfully.' })
+        setGalleryForm({ title: '', description: '', image: null })
+        fetchGallery()
+      }
+    } catch (error) {
+      setMessage({
+        type: 'error',
+        text:
+          error.response?.data?.message ||
+          'Failed to upload image. Please try again.',
+      })
+    } finally {
+      setGalleryLoading(false)
+    }
+  }
+
+  const handleBeforeAfterUpload = async (e) => {
+    e.preventDefault()
+    if (!beforeAfterForm.before || !beforeAfterForm.after) {
+      setMessage({
+        type: 'error',
+        text: 'Please select both before and after images.',
+      })
+      return
+    }
+
+    setGalleryLoading(true)
+    try {
+      const token = localStorage.getItem('adminToken')
+      const formData = new FormData()
+      formData.append('title', beforeAfterForm.title)
+      formData.append('description', beforeAfterForm.description)
+      formData.append('before', beforeAfterForm.before)
+      formData.append('after', beforeAfterForm.after)
+
+      const res = await axios.post(
+        '/api/admin/gallery/before-after',
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      )
+
+      if (res.data.success) {
+        setMessage({
+          type: 'success',
+          text: 'Before/After uploaded successfully.',
+        })
+        setBeforeAfterForm({
+          title: '',
+          description: '',
+          before: null,
+          after: null,
+        })
+        fetchGallery()
+      }
+    } catch (error) {
+      setMessage({
+        type: 'error',
+        text:
+          error.response?.data?.message ||
+          'Failed to upload before/after. Please try again.',
+      })
+    } finally {
+      setGalleryLoading(false)
+    }
+  }
+
+  const handleDeleteGalleryImage = async (id) => {
+    if (!window.confirm('Delete this image?')) return
+
+    setGalleryLoading(true)
+    try {
+      const token = localStorage.getItem('adminToken')
+      await axios.delete(`/api/admin/gallery/images/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      setMessage({ type: 'success', text: 'Image deleted.' })
+      fetchGallery()
+    } catch (error) {
+      setMessage({
+        type: 'error',
+        text:
+          error.response?.data?.message ||
+          'Failed to delete image. Please try again.',
+      })
+    } finally {
+      setGalleryLoading(false)
+    }
+  }
+
+  const handleDeleteBeforeAfter = async (id) => {
+    if (!window.confirm('Delete this before/after item?')) return
+
+    setGalleryLoading(true)
+    try {
+      const token = localStorage.getItem('adminToken')
+      await axios.delete(`/api/admin/gallery/before-after/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      setMessage({ type: 'success', text: 'Before/After deleted.' })
+      fetchGallery()
+    } catch (error) {
+      setMessage({
+        type: 'error',
+        text:
+          error.response?.data?.message ||
+          'Failed to delete before/after item. Please try again.',
+      })
+    } finally {
+      setGalleryLoading(false)
+    }
+  }
+
+  // Reset gallery page when list changes
+  useEffect(() => {
+    setGalleryPage(1)
+  }, [galleryImages.length])
 
   const handleVerifyReview = async (id, verified) => {
     setLoading(true)
@@ -434,6 +642,8 @@ const AdminDashboard = () => {
         return 'Contact Information'
       case 'reviews':
         return 'Reviews Management'
+      case 'gallery':
+        return 'Gallery'
       default:
         return 'Service Pricing'
     }
@@ -503,6 +713,16 @@ const AdminDashboard = () => {
             >
               Reviews Management
             </button>
+            <button
+              onClick={() => setActiveTab('gallery')}
+              className={`px-6 py-3 font-semibold transition-colors ${
+                activeTab === 'gallery'
+                  ? 'text-primary-600 dark:text-primary-400 border-b-2 border-primary-600 dark:border-primary-400'
+                  : 'text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400'
+              }`}
+            >
+              Gallery
+            </button>
           </div>
 
           {/* Mobile: Dropdown Select */}
@@ -516,6 +736,7 @@ const AdminDashboard = () => {
                 <option value="pricing">Service Pricing</option>
                 <option value="contact">Contact Information</option>
                 <option value="reviews">Reviews Management</option>
+                <option value="gallery">Gallery</option>
               </select>
               <FiChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 pointer-events-none" />
             </div>
@@ -986,6 +1207,307 @@ const AdminDashboard = () => {
               No pricing data found. Please initialize pricing first.
             </p>
           </div>
+        )}
+
+        {/* Gallery Tab */}
+        {activeTab === 'gallery' && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden"
+          >
+            <div className="p-4 sm:p-6 space-y-8">
+              {/* Upload normal image */}
+              <div>
+                <div className="flex items-center space-x-2 mb-3">
+                  <FiImage className="text-primary-500" />
+                  <h3 className="text-lg font-semibold">Gallery Images</h3>
+                </div>
+                <form
+                  onSubmit={handleGalleryUpload}
+                  className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                >
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-sm font-semibold mb-1">
+                        Title (optional)
+                      </label>
+                      <input
+                        type="text"
+                        value={galleryForm.title}
+                        onChange={(e) =>
+                          setGalleryForm({
+                            ...galleryForm,
+                            title: e.target.value,
+                          })
+                        }
+                        className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-primary-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold mb-1">
+                        Description (optional)
+                      </label>
+                      <textarea
+                        rows="3"
+                        value={galleryForm.description}
+                        onChange={(e) =>
+                          setGalleryForm({
+                            ...galleryForm,
+                            description: e.target.value,
+                          })
+                        }
+                        className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-primary-500"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-sm font-semibold mb-1">
+                        Image file
+                      </label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) =>
+                          setGalleryForm({
+                            ...galleryForm,
+                            image: e.target.files?.[0] || null,
+                          })
+                        }
+                        className="w-full text-sm text-gray-600 dark:text-gray-300"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Max ~8MB. JPG/PNG.
+                      </p>
+                    </div>
+                    <button
+                      type="submit"
+                      disabled={galleryLoading}
+                      className="btn-primary w-full flex items-center justify-center space-x-2 disabled:opacity-50"
+                    >
+                      <FiUpload />
+                      <span>
+                        {galleryLoading ? 'Uploading...' : 'Upload Image'}
+                      </span>
+                    </button>
+                  </div>
+                </form>
+
+                <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {galleryImages.length === 0 ? (
+                    <div className="text-gray-500">No images yet.</div>
+                  ) : (
+                    galleryImages
+                      .slice((galleryPage - 1) * 6, galleryPage * 6)
+                      .map((img) => (
+                        <div
+                          key={img._id}
+                          className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden"
+                        >
+                          <img
+                            src={img.imageUrl}
+                            alt={img.title || 'Gallery image'}
+                            className="w-full h-48 object-cover"
+                          />
+                          <div className="p-3 space-y-1">
+                            <div className="font-semibold text-sm">
+                              {img.title || 'Untitled'}
+                            </div>
+                            {img.description && (
+                              <p className="text-xs text-gray-600 dark:text-gray-400">
+                                {img.description}
+                              </p>
+                            )}
+                            <button
+                              onClick={() => handleDeleteGalleryImage(img._id)}
+                              className="mt-2 inline-flex items-center space-x-1 text-sm text-red-600 hover:text-red-700"
+                              type="button"
+                            >
+                              <FiTrash2 />
+                              <span>Delete</span>
+                            </button>
+                          </div>
+                        </div>
+                      ))
+                  )}
+                </div>
+                {galleryImages.length > 6 && (
+                  <div className="mt-4 flex items-center justify-center space-x-3">
+                    <button
+                      type="button"
+                      disabled={galleryPage === 1}
+                      onClick={() => setGalleryPage((p) => Math.max(1, p - 1))}
+                      className="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-sm disabled:opacity-50"
+                    >
+                      Prev
+                    </button>
+                    <div className="text-sm text-gray-700 dark:text-gray-200">
+                      Page {galleryPage} of{' '}
+                      {Math.ceil(galleryImages.length / 6)}
+                    </div>
+                    <button
+                      type="button"
+                      disabled={
+                        galleryPage >= Math.ceil(galleryImages.length / 6)
+                      }
+                      onClick={() =>
+                        setGalleryPage((p) =>
+                          Math.min(Math.ceil(galleryImages.length / 6), p + 1)
+                        )
+                      }
+                      className="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-sm disabled:opacity-50"
+                    >
+                      Next
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              <hr className="border-gray-200 dark:border-gray-700" />
+
+              {/* Before / After */}
+              <div>
+                <div className="flex items-center space-x-2 mb-3">
+                  <FiLayers className="text-primary-500" />
+                  <h3 className="text-lg font-semibold">Before / After</h3>
+                </div>
+
+                <form
+                  onSubmit={handleBeforeAfterUpload}
+                  className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                >
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-sm font-semibold mb-1">
+                        Title (optional)
+                      </label>
+                      <input
+                        type="text"
+                        value={beforeAfterForm.title}
+                        onChange={(e) =>
+                          setBeforeAfterForm({
+                            ...beforeAfterForm,
+                            title: e.target.value,
+                          })
+                        }
+                        className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-primary-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold mb-1">
+                        Description (optional)
+                      </label>
+                      <textarea
+                        rows="3"
+                        value={beforeAfterForm.description}
+                        onChange={(e) =>
+                          setBeforeAfterForm({
+                            ...beforeAfterForm,
+                            description: e.target.value,
+                          })
+                        }
+                        className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-primary-500"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-sm font-semibold mb-1">
+                          Before image
+                        </label>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) =>
+                            setBeforeAfterForm({
+                              ...beforeAfterForm,
+                              before: e.target.files?.[0] || null,
+                            })
+                          }
+                          className="w-full text-sm text-gray-600 dark:text-gray-300"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold mb-1">
+                          After image
+                        </label>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) =>
+                            setBeforeAfterForm({
+                              ...beforeAfterForm,
+                              after: e.target.files?.[0] || null,
+                            })
+                          }
+                          className="w-full text-sm text-gray-600 dark:text-gray-300"
+                        />
+                      </div>
+                    </div>
+                    <button
+                      type="submit"
+                      disabled={galleryLoading}
+                      className="btn-primary w-full flex items-center justify-center space-x-2 disabled:opacity-50"
+                    >
+                      <FiUpload />
+                      <span>
+                        {galleryLoading
+                          ? 'Uploading...'
+                          : 'Upload Before/After'}
+                      </span>
+                    </button>
+                  </div>
+                </form>
+
+                <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {beforeAfterItems.length === 0 ? (
+                    <div className="text-gray-500">No before/after yet.</div>
+                  ) : (
+                    beforeAfterItems.map((item) => (
+                      <div
+                        key={item._id}
+                        className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden"
+                      >
+                        <div className="grid grid-cols-2">
+                          <img
+                            src={item.beforeUrl}
+                            alt="Before"
+                            className="w-full h-40 object-cover"
+                          />
+                          <img
+                            src={item.afterUrl}
+                            alt="After"
+                            className="w-full h-40 object-cover"
+                          />
+                        </div>
+                        <div className="p-3 space-y-1">
+                          <div className="font-semibold text-sm">
+                            {item.title || 'Project'}
+                          </div>
+                          {item.description && (
+                            <p className="text-xs text-gray-600 dark:text-gray-400">
+                              {item.description}
+                            </p>
+                          )}
+                          <button
+                            onClick={() => handleDeleteBeforeAfter(item._id)}
+                            className="mt-2 inline-flex items-center space-x-1 text-sm text-red-600 hover:text-red-700"
+                            type="button"
+                          >
+                            <FiTrash2 />
+                            <span>Delete</span>
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </div>
+          </motion.div>
         )}
 
         {/* Reviews Management Tab */}
