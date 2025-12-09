@@ -31,6 +31,12 @@ const reviewSchema = new mongoose.Schema(
       enum: ['google', 'website', 'manual'],
       default: 'website',
     },
+    imageUrl: {
+      type: String,
+    },
+    imagePublicId: {
+      type: String,
+    },
   },
   {
     timestamps: true,
@@ -38,4 +44,3 @@ const reviewSchema = new mongoose.Schema(
 )
 
 module.exports = mongoose.model('Review', reviewSchema)
-

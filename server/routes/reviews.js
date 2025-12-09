@@ -1,7 +1,18 @@
 const express = require('express')
+const multer = require('multer')
 const Review = require('../models/Review')
+const cloudinary = require('../utils/cloudinary')
 
 const router = express.Router()
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+})
+
+const isCloudinaryConfigured =
+  !!process.env.CLOUDINARY_CLOUD_NAME &&
+  !!process.env.CLOUDINARY_API_KEY &&
+  !!process.env.CLOUDINARY_API_SECRET
 
 // Get all reviews (only verified ones for public)
 router.get('/', async (req, res) => {
@@ -26,6 +37,7 @@ router.get('/', async (req, res) => {
       phone: review.phone,
       verified: review.verified,
       source: review.source,
+      imageUrl: review.imageUrl,
       date: formatDate(review.createdAt),
       createdAt: review.createdAt,
     }))
@@ -63,7 +75,7 @@ function formatDate(date) {
 }
 
 // Create a review
-router.post('/', async (req, res) => {
+router.post('/', upload.single('image'), async (req, res) => {
   try {
     const { name, rating, text, email, phone, source } = req.body
 
@@ -83,6 +95,38 @@ router.post('/', async (req, res) => {
       })
     }
 
+    let imageUploadResult = null
+
+    // Upload image to Cloudinary if provided
+    if (req.file) {
+      if (!isCloudinaryConfigured) {
+        return res.status(500).json({
+          success: false,
+          message:
+            'Image upload is not configured. Please contact support or try again later.',
+        })
+      }
+
+      const folder = process.env.CLOUDINARY_FOLDER || 'mk-epoxy/reviews'
+
+      imageUploadResult = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          {
+            folder,
+            resource_type: 'image',
+            transformation: [{ width: 1200, height: 1200, crop: 'limit' }],
+          },
+          (error, result) => {
+            if (error) {
+              return reject(error)
+            }
+            resolve(result)
+          }
+        )
+        stream.end(req.file.buffer)
+      })
+    }
+
     const review = new Review({
       name,
       rating: parseInt(rating),
@@ -91,6 +135,8 @@ router.post('/', async (req, res) => {
       phone: phone || '',
       source: source || 'website',
       verified: false, // Reviews need to be verified by admin
+      imageUrl: imageUploadResult?.secure_url || '',
+      imagePublicId: imageUploadResult?.public_id || '',
     })
 
     await review.save()

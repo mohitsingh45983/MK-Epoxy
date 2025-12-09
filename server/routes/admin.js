@@ -221,22 +221,28 @@ router.post('/init-pricing', async (req, res) => {
 // Get all reviews (admin only - includes unverified)
 router.get('/reviews', verifyAdmin, async (req, res) => {
   try {
-    const { verified, search, rating, sortBy = 'createdAt', sortOrder = 'desc' } = req.query
-    
+    const {
+      verified,
+      search,
+      rating,
+      sortBy = 'createdAt',
+      sortOrder = 'desc',
+    } = req.query
+
     let query = {}
-    
+
     // Filter by verification status
     if (verified === 'true') {
       query.verified = true
     } else if (verified === 'false') {
       query.verified = false
     }
-    
+
     // Filter by rating
     if (rating) {
       query.rating = parseInt(rating)
     }
-    
+
     // Search by name, email, or text
     if (search) {
       query.$or = [
@@ -245,14 +251,12 @@ router.get('/reviews', verifyAdmin, async (req, res) => {
         { text: { $regex: search, $options: 'i' } },
       ]
     }
-    
+
     const sortOptions = {}
     sortOptions[sortBy] = sortOrder === 'asc' ? 1 : -1
-    
-    const reviews = await Review.find(query)
-      .sort(sortOptions)
-      .limit(200)
-    
+
+    const reviews = await Review.find(query).sort(sortOptions).limit(200)
+
     // Format dates
     const formattedReviews = reviews.map((review) => ({
       _id: review._id,
@@ -263,10 +267,12 @@ router.get('/reviews', verifyAdmin, async (req, res) => {
       phone: review.phone,
       verified: review.verified,
       source: review.source,
+      imageUrl: review.imageUrl,
+      imagePublicId: review.imagePublicId,
       createdAt: review.createdAt,
       date: formatReviewDate(review.createdAt),
     }))
-    
+
     res.json({ success: true, reviews: formattedReviews })
   } catch (error) {
     res.status(500).json({
@@ -286,14 +292,14 @@ router.put('/reviews/:id/verify', verifyAdmin, async (req, res) => {
       { verified: verified === true || verified === 'true' },
       { new: true }
     )
-    
+
     if (!review) {
       return res.status(404).json({
         success: false,
         message: 'Review not found',
       })
     }
-    
+
     res.json({
       success: true,
       message: `Review ${verified ? 'verified' : 'unverified'} successfully`,
@@ -312,14 +318,14 @@ router.put('/reviews/:id/verify', verifyAdmin, async (req, res) => {
 router.delete('/reviews/:id', verifyAdmin, async (req, res) => {
   try {
     const review = await Review.findByIdAndDelete(req.params.id)
-    
+
     if (!review) {
       return res.status(404).json({
         success: false,
         message: 'Review not found',
       })
     }
-    
+
     res.json({
       success: true,
       message: 'Review deleted successfully',
@@ -339,7 +345,7 @@ function formatReviewDate(date) {
   const reviewDate = new Date(date)
   const diffTime = Math.abs(now - reviewDate)
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-  
+
   if (diffDays === 0) return 'Today'
   if (diffDays === 1) return 'Yesterday'
   if (diffDays < 7) return `${diffDays} days ago`

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { FaStar, FaGoogle } from 'react-icons/fa'
+import { FaStar } from 'react-icons/fa'
 import { FiCheckCircle, FiX } from 'react-icons/fi'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Navigation, Pagination, Autoplay } from 'swiper/modules'
@@ -22,6 +22,7 @@ const Reviews = () => {
     phone: '',
     rating: 5,
     text: '',
+    image: null,
   })
 
   useEffect(() => {
@@ -55,6 +56,14 @@ const Reviews = () => {
   }
 
   const handleChange = (e) => {
+    if (e.target.name === 'image') {
+      setFormData({
+        ...formData,
+        image: e.target.files?.[0] || null,
+      })
+      return
+    }
+
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
@@ -73,7 +82,19 @@ const Reviews = () => {
     setSubmitStatus(null)
 
     try {
-      const response = await axios.post('/api/reviews', formData)
+      const payload = new FormData()
+      payload.append('name', formData.name)
+      payload.append('email', formData.email)
+      payload.append('phone', formData.phone)
+      payload.append('rating', formData.rating)
+      payload.append('text', formData.text)
+      if (formData.image) {
+        payload.append('image', formData.image)
+      }
+
+      const response = await axios.post('/api/reviews', payload, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
       if (response.data.success) {
         setSubmitStatus('success')
         setFormData({
@@ -82,6 +103,7 @@ const Reviews = () => {
           phone: '',
           rating: 5,
           text: '',
+          image: null,
         })
         setShowForm(false)
         // Refresh reviews and stats
@@ -134,25 +156,18 @@ const Reviews = () => {
             transition={{ duration: 0.6 }}
             className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl p-6 sm:p-8 md:p-12 max-w-4xl mx-auto text-center"
           >
-            <div className="flex flex-col sm:flex-row items-center justify-center mb-4 gap-4">
-              <FaGoogle className="text-3xl sm:text-4xl text-primary-600 dark:text-primary-400" />
+            <div className="flex flex-col items-center justify-center mb-4 gap-4">
               <div>
-                <div className="text-4xl sm:text-5xl font-bold mb-2">{averageRating}</div>
+                <div className="text-4xl sm:text-5xl font-bold mb-2">
+                  {averageRating}
+                </div>
                 <div className="flex justify-center mb-2">{renderStars(5)}</div>
                 <div className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
-                  Based on {totalReviews} Google Reviews
+                  Based on {totalReviews} verified reviews
                 </div>
               </div>
             </div>
             <div className="flex flex-col sm:flex-row gap-4 justify-center mt-6">
-              <a
-                href="https://g.page/r/YOUR_GOOGLE_PLACE_ID/review"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn-primary inline-block"
-              >
-                Leave a Review on Google
-              </a>
               <button
                 onClick={() => setShowForm(!showForm)}
                 className="btn-secondary inline-block"
@@ -173,12 +188,17 @@ const Reviews = () => {
               animate={{ opacity: 1, y: 0 }}
               className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl p-6 sm:p-8"
             >
-              <h2 className="text-3xl font-bold mb-6 text-center">Write a Review</h2>
-              
+              <h2 className="text-3xl font-bold mb-6 text-center">
+                Write a Review
+              </h2>
+
               {submitStatus === 'success' && (
                 <div className="mb-6 p-4 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-lg flex items-center">
                   <FiCheckCircle className="mr-2 text-xl" />
-                  <span>Thank you! Your review has been submitted and will be displayed after verification.</span>
+                  <span>
+                    Thank you! Your review has been submitted and will be
+                    displayed after verification.
+                  </span>
                 </div>
               )}
 
@@ -236,6 +256,22 @@ const Reviews = () => {
 
                 <div>
                   <label className="block text-sm font-semibold mb-2">
+                    Add a photo (optional)
+                  </label>
+                  <input
+                    type="file"
+                    name="image"
+                    accept="image/*"
+                    onChange={handleChange}
+                    className="w-full text-sm text-gray-600 dark:text-gray-300"
+                  />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Max 5MB. JPG/PNG preferred.
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold mb-2">
                     Rating *
                   </label>
                   <div className="flex space-x-2">
@@ -278,10 +314,7 @@ const Reviews = () => {
                   />
                 </div>
 
-                <button
-                  type="submit"
-                  className="w-full btn-primary py-3"
-                >
+                <button type="submit" className="w-full btn-primary py-3">
                   Submit Review
                 </button>
               </form>
@@ -308,30 +341,34 @@ const Reviews = () => {
 
           {loading ? (
             <div className="text-center py-12">
-              <p className="text-gray-600 dark:text-gray-400">Loading reviews...</p>
+              <p className="text-gray-600 dark:text-gray-400">
+                Loading reviews...
+              </p>
             </div>
           ) : reviews.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-600 dark:text-gray-400">No reviews yet. Be the first to review!</p>
+              <p className="text-gray-600 dark:text-gray-400">
+                No reviews yet. Be the first to review!
+              </p>
             </div>
           ) : (
             <Swiper
-            modules={[Navigation, Pagination, Autoplay]}
-            spaceBetween={30}
-            slidesPerView={1}
-            navigation
-            pagination={{ clickable: true }}
-            autoplay={{ delay: 5000 }}
-            breakpoints={{
-              640: {
-                slidesPerView: 2,
-              },
-              1024: {
-                slidesPerView: 3,
-              },
-            }}
-            className="pb-12"
-          >
+              modules={[Navigation, Pagination, Autoplay]}
+              spaceBetween={30}
+              slidesPerView={1}
+              navigation
+              pagination={{ clickable: true }}
+              autoplay={{ delay: 5000 }}
+              breakpoints={{
+                640: {
+                  slidesPerView: 2,
+                },
+                1024: {
+                  slidesPerView: 3,
+                },
+              }}
+              className="pb-12"
+            >
               {reviews.map((review, index) => (
                 <SwiperSlide key={review._id || index}>
                   <motion.div
@@ -355,10 +392,19 @@ const Reviews = () => {
                       "{review.text}"
                     </p>
                     <div className="border-t border-gray-200 dark:border-gray-700 pt-3 sm:pt-4">
-                      <div className="font-semibold text-sm sm:text-base">{review.name}</div>
+                      <div className="font-semibold text-sm sm:text-base">
+                        {review.name}
+                      </div>
                       <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
                         {review.date || 'Recently'}
                       </div>
+                      {review.imageUrl && (
+                        <img
+                          src={review.imageUrl}
+                          alt={`Review from ${review.name}`}
+                          className="mt-3 sm:mt-4 w-full h-48 object-cover rounded-lg border border-gray-200 dark:border-gray-700"
+                        />
+                      )}
                     </div>
                   </motion.div>
                 </SwiperSlide>
@@ -368,55 +414,9 @@ const Reviews = () => {
         </div>
       </section>
 
-      {/* Video Reviews Section */}
-      <section className="section-padding">
-        <div className="container-custom">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-12"
-          >
-            <h2 className="text-4xl font-bold mb-4">Video Reviews</h2>
-            <p className="text-lg text-gray-600 dark:text-gray-400">
-              Watch our clients share their experience
-            </p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="bg-gray-200 dark:bg-gray-800 rounded-lg aspect-video flex items-center justify-center"
-            >
-              <p className="text-gray-500 dark:text-gray-400">
-                Video Review Placeholder
-                <br />
-                <span className="text-sm">Add your video reviews here</span>
-              </p>
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="bg-gray-200 dark:bg-gray-800 rounded-lg aspect-video flex items-center justify-center"
-            >
-              <p className="text-gray-500 dark:text-gray-400">
-                Video Review Placeholder
-                <br />
-                <span className="text-sm">Add your video reviews here</span>
-              </p>
-            </motion.div>
-          </div>
-        </div>
-      </section>
+      {/* Video Reviews Section removed */}
     </div>
   )
 }
 
 export default Reviews
-

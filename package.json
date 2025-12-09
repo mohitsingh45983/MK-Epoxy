@@ -18,7 +18,8 @@
     "cors": "^2.8.5",
     "nodemailer": "^6.9.7",
     "jsonwebtoken": "^9.0.2",
-    "bcryptjs": "^2.4.3"
+    "bcryptjs": "^2.4.3",
+    "cloudinary": "^1.41.3"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.2.1",
@@ -37,4 +38,3 @@
     "init-reviews": "node server/scripts/initReviews.js"
   }
 }
-
