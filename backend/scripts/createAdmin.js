@@ -3,7 +3,7 @@ const Admin = require('../models/Admin')
 require('dotenv').config()
 
 const MONGODB_URI =
-  process.env.MONGODB_URI || 'mongodb://localhost:27017/mk_epoxy'
+  process.env.MONGODB_URI
 
 async function createAdmin() {
   try {
