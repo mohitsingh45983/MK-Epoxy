@@ -1,5 +1,6 @@
 const express = require('express')
 const ServicePricing = require('../models/ServicePricing')
+const Service = require('../models/Service')
 const ContactInfo = require('../models/ContactInfo')
 const Review = require('../models/Review')
 const Admin = require('../models/Admin')
@@ -68,7 +69,7 @@ router.post('/login', async (req, res) => {
 // Get all service pricing
 router.get('/pricing', verifyAdmin, async (req, res) => {
   try {
-    const pricing = await ServicePricing.find({ isActive: true }).sort({
+    const pricing = await ServicePricing.find().sort({
       serviceName: 1,
     })
     res.json({ success: true, pricing })
@@ -98,6 +99,12 @@ router.put('/pricing/:id', verifyAdmin, async (req, res) => {
         .json({ success: false, message: 'Service pricing not found' })
     }
 
+    // Also update matching services so dashboard reflects latest pricing
+    await Service.updateMany(
+      { title: pricing.serviceName },
+      { ratePerSqft: pricing.pricePerSqft }
+    )
+
     res.json({
       success: true,
       message: 'Pricing updated successfully',
@@ -115,14 +122,24 @@ router.put('/pricing/:id', verifyAdmin, async (req, res) => {
 // Create new service pricing
 router.post('/pricing', verifyAdmin, async (req, res) => {
   try {
-    const { serviceName, pricePerSqft } = req.body
+    const { serviceName, pricePerSqft, isActive = true } = req.body
 
     const pricing = new ServicePricing({
       serviceName,
-      pricePerSqft,
+      pricePerSqft: Number(pricePerSqft),
+      isActive,
     })
 
     await pricing.save()
+
+    // Also push rate to matching services for dashboard sync
+    await Service.updateMany(
+      { title: serviceName },
+      {
+        ratePerSqft: Number(pricePerSqft),
+        isActive,
+      }
+    )
 
     res.status(201).json({
       success: true,

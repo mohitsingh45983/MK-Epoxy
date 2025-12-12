@@ -7,6 +7,7 @@ import ThemeToggle from './components/ThemeToggle'
 import Home from './pages/Home'
 import About from './pages/About'
 import Services from './pages/Services'
+import ServiceDetail from './pages/ServiceDetail'
 import Gallery from './pages/Gallery'
 import Reviews from './pages/Reviews'
 import Quotation from './pages/Quotation'
@@ -41,6 +42,7 @@ function AppContent() {
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
           <Route path="/services" element={<Services />} />
+          <Route path="/services/:slug" element={<ServiceDetail />} />
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/reviews" element={<Reviews />} />
           <Route path="/quotation" element={<Quotation />} />

@@ -19,12 +19,13 @@ import {
   FiImage,
   FiUpload,
   FiLayers,
+  FiPlus,
 } from 'react-icons/fi'
 import { FaStar } from 'react-icons/fa'
 import axios from 'axios'
 
 const AdminDashboard = () => {
-  const [activeTab, setActiveTab] = useState('pricing') // 'pricing', 'contact', or 'reviews'
+  const [activeTab, setActiveTab] = useState('services') // services, pricing, contact, reviews, gallery
   const [pricing, setPricing] = useState([])
   const [contactInfo, setContactInfo] = useState(null)
   const [editingId, setEditingId] = useState(null)
@@ -82,6 +83,35 @@ const AdminDashboard = () => {
     after: null,
   })
   const [galleryPage, setGalleryPage] = useState(1)
+  const [services, setServices] = useState([])
+  const [servicesLoading, setServicesLoading] = useState(false)
+  const [serviceForm, setServiceForm] = useState({
+    title: '',
+    slug: '',
+    shortDescription: '',
+    description: '',
+    benefits: '',
+    processSteps: '',
+    warranty: '',
+    ratePerSqft: '',
+    isActive: true,
+    order: 0,
+    coverImage: null,
+  })
+  const [editingServiceId, setEditingServiceId] = useState(null)
+  const [serviceEditValues, setServiceEditValues] = useState({
+    title: '',
+    slug: '',
+    shortDescription: '',
+    description: '',
+    benefits: '',
+    processSteps: '',
+    warranty: '',
+    ratePerSqft: '',
+    isActive: true,
+    order: 0,
+    coverImage: null,
+  })
 
   useEffect(() => {
     // Check if admin is logged in
@@ -93,6 +123,7 @@ const AdminDashboard = () => {
 
     fetchPricing()
     fetchContactInfo()
+    fetchServices()
     if (activeTab === 'reviews') {
       fetchReviews()
     }
@@ -104,6 +135,9 @@ const AdminDashboard = () => {
     }
     if (activeTab === 'gallery') {
       fetchGallery()
+    }
+    if (activeTab === 'services') {
+      fetchServices()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -188,6 +222,40 @@ const AdminDashboard = () => {
     } catch (error) {
       console.error('Error fetching contact info:', error)
       // Keep default values if fetch fails
+    }
+  }
+
+  const fetchServices = async () => {
+    setServicesLoading(true)
+    try {
+      const token = localStorage.getItem('adminToken')
+      if (!token) {
+        navigate('/admin/login')
+        return
+      }
+
+      const response = await axios.get('/api/admin/services', {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+
+      if (response.data.success) {
+        setServices(response.data.services || [])
+      }
+    } catch (error) {
+      if (error.response?.status === 401) {
+        localStorage.removeItem('adminToken')
+        localStorage.removeItem('adminUser')
+        navigate('/admin/login')
+      } else {
+        setMessage({
+          type: 'error',
+          text:
+            error.response?.data?.message ||
+            'Failed to fetch services. Please try again.',
+        })
+      }
+    } finally {
+      setServicesLoading(false)
     }
   }
 
@@ -452,6 +520,158 @@ const AdminDashboard = () => {
     }
   }
 
+  const buildServiceFormData = (values) => {
+    const formData = new FormData()
+    formData.append('title', values.title)
+    if (values.slug) formData.append('slug', values.slug)
+    formData.append('shortDescription', values.shortDescription || '')
+    formData.append('description', values.description || '')
+    formData.append('benefits', values.benefits || '')
+    formData.append('processSteps', values.processSteps || '')
+    formData.append('warranty', values.warranty || '')
+    if (values.ratePerSqft !== '') {
+      formData.append('ratePerSqft', values.ratePerSqft)
+    }
+    formData.append('isActive', values.isActive)
+    formData.append('order', values.order || 0)
+    if (values.coverImage) {
+      formData.append('coverImage', values.coverImage)
+    }
+    return formData
+  }
+
+  const handleServiceCreate = async (e) => {
+    e.preventDefault()
+    setServicesLoading(true)
+    setMessage({ type: '', text: '' })
+
+    try {
+      const token = localStorage.getItem('adminToken')
+      const formData = buildServiceFormData(serviceForm)
+
+      const res = await axios.post('/api/admin/services', formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      })
+
+      if (res.data.success) {
+        setMessage({ type: 'success', text: 'Service created successfully.' })
+        setServiceForm({
+          title: '',
+          slug: '',
+          shortDescription: '',
+          description: '',
+          benefits: '',
+          processSteps: '',
+          warranty: '',
+          ratePerSqft: '',
+          isActive: true,
+          order: 0,
+          coverImage: null,
+        })
+        fetchServices()
+      }
+    } catch (error) {
+      setMessage({
+        type: 'error',
+        text:
+          error.response?.data?.message ||
+          'Failed to create service. Please try again.',
+      })
+    } finally {
+      setServicesLoading(false)
+    }
+  }
+
+  const startEditService = (service) => {
+    setEditingServiceId(service._id)
+    setServiceEditValues({
+      title: service.title || '',
+      slug: service.slug || '',
+      shortDescription: service.shortDescription || '',
+      description: service.description || '',
+      benefits: (service.benefits || []).join('\n'),
+      processSteps: (service.processSteps || []).join('\n'),
+      warranty: service.warranty || '',
+      ratePerSqft:
+        service.ratePerSqft === undefined ? '' : service.ratePerSqft,
+      isActive: service.isActive,
+      order: service.order || 0,
+      coverImage: null,
+    })
+  }
+
+  const handleServiceUpdate = async (e) => {
+    e.preventDefault()
+    if (!editingServiceId) return
+
+    setServicesLoading(true)
+    setMessage({ type: '', text: '' })
+
+    try {
+      const token = localStorage.getItem('adminToken')
+      const formData = buildServiceFormData(serviceEditValues)
+
+      const res = await axios.put(
+        `/api/admin/services/${editingServiceId}`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      )
+
+      if (res.data.success) {
+        setMessage({ type: 'success', text: 'Service updated successfully.' })
+        setEditingServiceId(null)
+        fetchServices()
+      }
+    } catch (error) {
+      setMessage({
+        type: 'error',
+        text:
+          error.response?.data?.message ||
+          'Failed to update service. Please try again.',
+      })
+    } finally {
+      setServicesLoading(false)
+    }
+  }
+
+  const handleServiceDelete = async (id) => {
+    if (
+      !window.confirm(
+        'Delete this service? This will remove it from the website.'
+      )
+    )
+      return
+
+    setServicesLoading(true)
+    try {
+      const token = localStorage.getItem('adminToken')
+      const res = await axios.delete(`/api/admin/services/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (res.data.success) {
+        setMessage({ type: 'success', text: 'Service deleted successfully.' })
+        fetchServices()
+      }
+    } catch (error) {
+      setMessage({
+        type: 'error',
+        text:
+          error.response?.data?.message ||
+          'Failed to delete service. Please try again.',
+      })
+    } finally {
+      setServicesLoading(false)
+    }
+  }
+
   // Reset gallery page when list changes
   useEffect(() => {
     setGalleryPage(1)
@@ -636,6 +856,8 @@ const AdminDashboard = () => {
 
   const getTabLabel = (tab) => {
     switch (tab) {
+      case 'services':
+        return 'Services'
       case 'pricing':
         return 'Service Pricing'
       case 'contact':
@@ -683,6 +905,16 @@ const AdminDashboard = () => {
         <div className="mb-6">
           {/* Desktop: Button Tabs */}
           <div className="hidden md:flex space-x-4 border-b border-gray-200 dark:border-gray-700">
+            <button
+              onClick={() => setActiveTab('services')}
+              className={`px-6 py-3 font-semibold transition-colors ${
+                activeTab === 'services'
+                  ? 'text-primary-600 dark:text-primary-400 border-b-2 border-primary-600 dark:border-primary-400'
+                  : 'text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400'
+              }`}
+            >
+              Services
+            </button>
             <button
               onClick={() => setActiveTab('pricing')}
               className={`px-6 py-3 font-semibold transition-colors ${
@@ -733,6 +965,7 @@ const AdminDashboard = () => {
                 onChange={(e) => setActiveTab(e.target.value)}
                 className="w-full px-4 py-3 pr-10 rounded-lg border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-semibold appearance-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               >
+                <option value="services">Services</option>
                 <option value="pricing">Service Pricing</option>
                 <option value="contact">Contact Information</option>
                 <option value="reviews">Reviews Management</option>
@@ -755,6 +988,423 @@ const AdminDashboard = () => {
             }`}
           >
             {message.text}
+          </motion.div>
+        )}
+
+        {/* Services Tab */}
+        {activeTab === 'services' && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="grid grid-cols-1 lg:grid-cols-3 gap-6"
+          >
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6 space-y-4 lg:col-span-1">
+              <div className="flex items-center space-x-2">
+                <FiPlus className="text-primary-500" />
+                <h3 className="text-lg font-semibold">Add Service</h3>
+              </div>
+              <form onSubmit={handleServiceCreate} className="space-y-3">
+                <input
+                  required
+                  type="text"
+                  placeholder="Title"
+                  value={serviceForm.title}
+                  onChange={(e) =>
+                    setServiceForm({ ...serviceForm, title: e.target.value })
+                  }
+                  className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500"
+                />
+                <input
+                  type="text"
+                  placeholder="Custom slug (optional)"
+                  value={serviceForm.slug}
+                  onChange={(e) =>
+                    setServiceForm({ ...serviceForm, slug: e.target.value })
+                  }
+                  className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500"
+                />
+                <textarea
+                  rows="2"
+                  placeholder="Short description"
+                  value={serviceForm.shortDescription}
+                  onChange={(e) =>
+                    setServiceForm({
+                      ...serviceForm,
+                      shortDescription: e.target.value,
+                    })
+                  }
+                  className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500"
+                />
+                <textarea
+                  rows="3"
+                  placeholder="Full description"
+                  value={serviceForm.description}
+                  onChange={(e) =>
+                    setServiceForm({
+                      ...serviceForm,
+                      description: e.target.value,
+                    })
+                  }
+                  className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500"
+                />
+                <textarea
+                  rows="3"
+                  placeholder="Benefits (comma or new line separated)"
+                  value={serviceForm.benefits}
+                  onChange={(e) =>
+                    setServiceForm({
+                      ...serviceForm,
+                      benefits: e.target.value,
+                    })
+                  }
+                  className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500"
+                />
+                <textarea
+                  rows="3"
+                  placeholder="Process steps (comma or new line separated)"
+                  value={serviceForm.processSteps}
+                  onChange={(e) =>
+                    setServiceForm({
+                      ...serviceForm,
+                      processSteps: e.target.value,
+                    })
+                  }
+                  className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500"
+                />
+                <input
+                  type="text"
+                  placeholder="Warranty (e.g. 1 year)"
+                  value={serviceForm.warranty}
+                  onChange={(e) =>
+                    setServiceForm({ ...serviceForm, warranty: e.target.value })
+                  }
+                  className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500"
+                />
+                <div className="grid grid-cols-2 gap-3">
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="Rate per sqft"
+                    value={serviceForm.ratePerSqft}
+                    onChange={(e) =>
+                      setServiceForm({
+                        ...serviceForm,
+                        ratePerSqft: e.target.value,
+                      })
+                    }
+                    className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500"
+                  />
+                  <input
+                    type="number"
+                    placeholder="Order"
+                    value={serviceForm.order}
+                    onChange={(e) =>
+                      setServiceForm({
+                        ...serviceForm,
+                        order: Number(e.target.value),
+                      })
+                    }
+                    className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500"
+                  />
+                </div>
+                <div className="flex items-center space-x-2">
+                  <label className="text-sm font-semibold">Status:</label>
+                  <select
+                    value={serviceForm.isActive}
+                    onChange={(e) =>
+                      setServiceForm({
+                        ...serviceForm,
+                        isActive: e.target.value === 'true',
+                      })
+                    }
+                    className="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500 text-sm"
+                  >
+                    <option value="true">Active</option>
+                    <option value="false">Inactive</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold mb-1">
+                    Cover image
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) =>
+                      setServiceForm({
+                        ...serviceForm,
+                        coverImage: e.target.files?.[0] || null,
+                      })
+                    }
+                    className="text-sm text-gray-600 dark:text-gray-300"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={servicesLoading}
+                  className="btn-primary w-full flex items-center justify-center space-x-2 disabled:opacity-50"
+                >
+                  <FiSave />
+                  <span>{servicesLoading ? 'Saving...' : 'Create Service'}</span>
+                </button>
+              </form>
+            </div>
+
+            <div className="lg:col-span-2 space-y-4">
+              {servicesLoading && services.length === 0 ? (
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow text-center text-gray-600 dark:text-gray-300">
+                  Loading services...
+                </div>
+              ) : services.length === 0 ? (
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow text-center text-gray-600 dark:text-gray-300">
+                  No services yet. Create your first service on the left.
+                </div>
+              ) : (
+                services.map((service) => {
+                  const isEditing = editingServiceId === service._id
+                  return (
+                    <div
+                      key={service._id}
+                      className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-xl shadow space-y-3"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <h3 className="text-xl font-semibold">
+                            {service.title}
+                          </h3>
+                          <p className="text-sm text-gray-500">
+                            Slug: {service.slug}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                              service.isActive
+                                ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200'
+                                : 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200'
+                            }`}
+                          >
+                            {service.isActive ? 'Active' : 'Inactive'}
+                          </span>
+                          <button
+                            onClick={() =>
+                              isEditing
+                                ? setEditingServiceId(null)
+                                : startEditService(service)
+                            }
+                            className="btn-secondary px-3 py-2 text-sm"
+                            type="button"
+                          >
+                            {isEditing ? 'Cancel' : 'Edit'}
+                          </button>
+                          <button
+                            onClick={() => handleServiceDelete(service._id)}
+                            className="px-3 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700"
+                            type="button"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+
+                      {service.coverImageUrl && (
+                        <img
+                          src={service.coverImageUrl}
+                          alt={service.title}
+                          className="w-full h-48 object-cover rounded-lg"
+                        />
+                      )}
+
+                      {!isEditing ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-gray-700 dark:text-gray-300">
+                          {service.shortDescription && (
+                            <p>{service.shortDescription}</p>
+                          )}
+                          {service.ratePerSqft !== undefined && (
+                            <div className="font-semibold">
+                              Rate: ₹{service.ratePerSqft}/sqft
+                            </div>
+                          )}
+                          {service.benefits?.length > 0 && (
+                            <div>
+                              <div className="font-semibold mb-1">Benefits</div>
+                              <ul className="list-disc list-inside space-y-1">
+                                {service.benefits.slice(0, 4).map((b) => (
+                                  <li key={b}>{b}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <form
+                          onSubmit={handleServiceUpdate}
+                          className="space-y-3 text-sm"
+                        >
+                          <input
+                            type="text"
+                            value={serviceEditValues.title}
+                            onChange={(e) =>
+                              setServiceEditValues({
+                                ...serviceEditValues,
+                                title: e.target.value,
+                              })
+                            }
+                            className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500"
+                          />
+                          <input
+                            type="text"
+                            placeholder="Slug"
+                            value={serviceEditValues.slug}
+                            onChange={(e) =>
+                              setServiceEditValues({
+                                ...serviceEditValues,
+                                slug: e.target.value,
+                              })
+                            }
+                            className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500"
+                          />
+                          <textarea
+                            rows="2"
+                            value={serviceEditValues.shortDescription}
+                            onChange={(e) =>
+                              setServiceEditValues({
+                                ...serviceEditValues,
+                                shortDescription: e.target.value,
+                              })
+                            }
+                            className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500"
+                          />
+                          <textarea
+                            rows="3"
+                            value={serviceEditValues.description}
+                            onChange={(e) =>
+                              setServiceEditValues({
+                                ...serviceEditValues,
+                                description: e.target.value,
+                              })
+                            }
+                            className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500"
+                          />
+                          <textarea
+                            rows="3"
+                            value={serviceEditValues.benefits}
+                            onChange={(e) =>
+                              setServiceEditValues({
+                                ...serviceEditValues,
+                                benefits: e.target.value,
+                              })
+                            }
+                            className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500"
+                          />
+                          <textarea
+                            rows="3"
+                            value={serviceEditValues.processSteps}
+                            onChange={(e) =>
+                              setServiceEditValues({
+                                ...serviceEditValues,
+                                processSteps: e.target.value,
+                              })
+                            }
+                            className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500"
+                          />
+                          <input
+                            type="text"
+                            placeholder="Warranty"
+                            value={serviceEditValues.warranty}
+                            onChange={(e) =>
+                              setServiceEditValues({
+                                ...serviceEditValues,
+                                warranty: e.target.value,
+                              })
+                            }
+                            className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500"
+                          />
+                          <div className="grid grid-cols-2 gap-3">
+                            <input
+                              type="number"
+                              min="0"
+                              step="0.01"
+                              value={serviceEditValues.ratePerSqft}
+                              onChange={(e) =>
+                                setServiceEditValues({
+                                  ...serviceEditValues,
+                                  ratePerSqft: e.target.value,
+                                })
+                              }
+                              className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500"
+                            />
+                            <input
+                              type="number"
+                              value={serviceEditValues.order}
+                              onChange={(e) =>
+                                setServiceEditValues({
+                                  ...serviceEditValues,
+                                  order: Number(e.target.value),
+                                })
+                              }
+                              className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500"
+                            />
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <label className="text-sm font-semibold">
+                              Status:
+                            </label>
+                            <select
+                              value={serviceEditValues.isActive}
+                              onChange={(e) =>
+                                setServiceEditValues({
+                                  ...serviceEditValues,
+                                  isActive: e.target.value === 'true',
+                                })
+                              }
+                              className="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-primary-500 text-sm"
+                            >
+                              <option value="true">Active</option>
+                              <option value="false">Inactive</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-semibold mb-1">
+                              Replace cover image
+                            </label>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) =>
+                                setServiceEditValues({
+                                  ...serviceEditValues,
+                                  coverImage: e.target.files?.[0] || null,
+                                })
+                              }
+                              className="text-sm text-gray-600 dark:text-gray-300"
+                            />
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <button
+                              type="submit"
+                              disabled={servicesLoading}
+                              className="btn-primary px-4 py-2 disabled:opacity-50"
+                            >
+                              {servicesLoading ? 'Saving...' : 'Save changes'}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setEditingServiceId(null)}
+                              className="btn-secondary px-4 py-2"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </form>
+                      )}
+                    </div>
+                  )
+                })
+              )}
+            </div>
           </motion.div>
         )}
 

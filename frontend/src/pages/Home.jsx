@@ -11,9 +11,11 @@ const Home = () => {
     phone: '+91 73397 23912',
     whatsapp: '917339723912',
   })
+  const [services, setServices] = useState([])
 
   useEffect(() => {
     fetchContactInfo()
+    fetchServices()
   }, [])
 
   const fetchContactInfo = async () => {
@@ -24,6 +26,17 @@ const Home = () => {
       }
     } catch (error) {
       console.error('Error fetching contact info:', error)
+    }
+  }
+
+  const fetchServices = async () => {
+    try {
+      const response = await axios.get('/api/services')
+      if (response.data.success) {
+        setServices(response.data.services || [])
+      }
+    } catch (error) {
+      console.error('Error fetching services:', error)
     }
   }
 
@@ -194,39 +207,48 @@ const Home = () => {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[
-              'Epoxy Flooring',
-              'Waterproofing',
-              'PU Flooring',
-              'Industrial Coating',
-              'Crack Filling',
-              'Expansion Joint Treatment',
-            ].map((service, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="bg-gradient-to-br from-primary-50 to-primary-100 dark:from-gray-800 dark:to-gray-700 p-6 rounded-lg hover:shadow-xl transition-shadow"
-              >
-                <h3 className="text-xl font-semibold mb-2">{service}</h3>
-                <Link
-                  to="/services"
-                  className="text-primary-600 dark:text-primary-400 font-medium hover:underline"
-                >
-                  Learn More →
-                </Link>
-              </motion.div>
-            ))}
-          </div>
+          {services.length === 0 ? (
+            <div className="text-center text-gray-600 dark:text-gray-400">
+              Services are being added. Check back soon.
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {services.slice(0, 6).map((service, index) => (
+                  <motion.div
+                    key={service.slug}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: index * 0.05 }}
+                    className="bg-gradient-to-br from-primary-50 to-primary-100 dark:from-gray-800 dark:to-gray-700 p-6 rounded-lg hover:shadow-xl transition-shadow"
+                  >
+                    <h3 className="text-xl font-semibold mb-2">
+                      {service.title}
+                    </h3>
+                    {service.shortDescription && (
+                      <p className="text-sm text-gray-700 dark:text-gray-300 mb-2 line-clamp-3">
+                        {service.shortDescription}
+                      </p>
+                    )}
+                    <Link
+                      to={`/services/${service.slug}`}
+                      className="text-primary-600 dark:text-primary-400 font-medium hover:underline inline-flex items-center space-x-1"
+                    >
+                      <span>Learn More</span>
+                      <span>→</span>
+                    </Link>
+                  </motion.div>
+                ))}
+              </div>
 
-          <div className="text-center mt-12">
-            <Link to="/services" className="btn-primary">
-              View All Services
-            </Link>
-          </div>
+              <div className="text-center mt-12">
+                <Link to="/services" className="btn-primary">
+                  View All Services
+                </Link>
+              </div>
+            </>
+          )}
         </div>
       </section>
     </div>

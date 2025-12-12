@@ -28,9 +28,11 @@ app.use('/api/quotation', require('./routes/quotation'))
 app.use('/api/reviews', require('./routes/reviews'))
 app.use('/api/contact', require('./routes/contact'))
 app.use('/api/contact-info', require('./routes/contactInfo'))
+app.use('/api/services', require('./routes/services'))
 app.use('/api/admin', require('./routes/admin'))
 app.use('/api/gallery', require('./routes/gallery'))
 app.use('/api/admin/gallery', require('./routes/galleryAdmin'))
+app.use('/api/admin/services', require('./routes/adminServices'))
 
 // Health check
 app.get('/api/health', (req, res) => {
