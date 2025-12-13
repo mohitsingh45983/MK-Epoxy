@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { FiArrowLeft, FiCheckCircle, FiClock, FiShield } from 'react-icons/fi'
 import axios from 'axios'
+import api from '../utils/api'
 
 const ServiceDetail = () => {
   const { slug } = useParams()
@@ -16,7 +17,7 @@ const ServiceDetail = () => {
       setLoading(true)
       setError('')
       try {
-        const res = await axios.get(`/api/services/${slug}`)
+        const res = await api.get(`/api/services/${slug}`)
         if (res.data.success) {
           setService(res.data.service)
         } else {

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { FiPhone, FiMail, FiMapPin, FiClock, FiLock } from 'react-icons/fi'
 import { FaWhatsapp, FaFacebook, FaInstagram, FaLinkedin } from 'react-icons/fa'
 import axios from 'axios'
+import api from '../utils/api'
 
 const Footer = () => {
   const [contactInfo, setContactInfo] = useState(null)
@@ -13,7 +14,7 @@ const Footer = () => {
 
   const fetchContactInfo = async () => {
     try {
-      const response = await axios.get('/api/contact-info')
+      const response = await api.get('/api/contact-info')
       if (response.data.success) {
         setContactInfo(response.data.contactInfo)
       }

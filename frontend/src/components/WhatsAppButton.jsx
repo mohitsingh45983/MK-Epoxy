@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { FaWhatsapp } from 'react-icons/fa'
 import { motion } from 'framer-motion'
 import axios from 'axios'
+import api from '../utils/api'
 
 const WhatsAppButton = () => {
   const [whatsappNumber, setWhatsappNumber] = useState('917339723912')
@@ -12,7 +13,7 @@ const WhatsAppButton = () => {
 
   const fetchContactInfo = async () => {
     try {
-      const response = await axios.get('/api/contact-info')
+      const response = await api.get('/api/contact-info')
       if (response.data.success && response.data.contactInfo.whatsapp) {
         setWhatsappNumber(response.data.contactInfo.whatsapp)
       }
