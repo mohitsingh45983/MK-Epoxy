@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { FiUpload, FiCheckCircle, FiX } from 'react-icons/fi'
 import axios from 'axios'
@@ -17,15 +17,22 @@ const Quotation = () => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitStatus, setSubmitStatus] = useState(null)
   const [estimate, setEstimate] = useState(null)
+  const [services, setServices] = useState([])
 
-  const services = [
-    'Epoxy Flooring',
-    'Waterproofing',
-    'PU Flooring',
-    'Industrial Coating',
-    'Crack Filling',
-    'Expansion Joint Treatment',
-  ]
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const res = await axios.get('/api/services')
+        if (res.data.success) {
+          setServices(res.data.services || [])
+        }
+      } catch (error) {
+        console.error('Unable to load services for quotation:', error)
+      }
+    }
+
+    fetchServices()
+  }, [])
 
   const handleChange = (e) => {
     setFormData({
@@ -314,8 +321,11 @@ const Quotation = () => {
                   >
                     <option value="">Select a service</option>
                     {services.map((service) => (
-                      <option key={service} value={service}>
-                        {service}
+                      <option key={service.slug || service.title} value={service.title}>
+                        {service.title}
+                        {service.ratePerSqft !== undefined && service.ratePerSqft !== null
+                          ? ` (₹${service.ratePerSqft}/sqft)`
+                          : ''}
                       </option>
                     ))}
                   </select>

@@ -3,7 +3,7 @@ const multer = require('multer')
 const path = require('path')
 const fs = require('fs')
 const Quotation = require('../models/Quotation')
-const ServicePricing = require('../models/ServicePricing')
+const Service = require('../models/Service')
 const nodemailer = require('nodemailer')
 
 const router = express.Router()
@@ -45,17 +45,17 @@ const upload = multer({
   },
 })
 
-// Calculate quotation estimate
+// Calculate quotation estimate using service rate
 async function calculateEstimate(service, area) {
   const areaNum = parseFloat(area) || 0
   
-  // Get pricing from database
-  const servicePricing = await ServicePricing.findOne({
-    serviceName: service,
+  // Get rate from Service model
+  const serviceDoc = await Service.findOne({
+    title: service,
     isActive: true,
   })
-  
-  const basePrice = servicePricing ? servicePricing.pricePerSqft : 80
+
+  const basePrice = serviceDoc?.ratePerSqft ?? 80
   const subtotal = areaNum * basePrice
 
   // Add 10% for labor and materials overhead

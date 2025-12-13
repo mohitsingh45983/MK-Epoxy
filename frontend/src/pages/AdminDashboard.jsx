@@ -6,7 +6,6 @@ import {
   FiSave,
   FiX,
   FiLogOut,
-  FiDollarSign,
   FiPhone,
   FiMail,
   FiMapPin,
@@ -25,11 +24,8 @@ import { FaStar } from 'react-icons/fa'
 import axios from 'axios'
 
 const AdminDashboard = () => {
-  const [activeTab, setActiveTab] = useState('services') // services, pricing, contact, reviews, gallery
-  const [pricing, setPricing] = useState([])
+  const [activeTab, setActiveTab] = useState('services') // services, contact, reviews, gallery
   const [contactInfo, setContactInfo] = useState(null)
-  const [editingId, setEditingId] = useState(null)
-  const [editValues, setEditValues] = useState({})
   const [contactEditValues, setContactEditValues] = useState({
     phone: '',
     whatsapp: '',
@@ -121,7 +117,6 @@ const AdminDashboard = () => {
       return
     }
 
-    fetchPricing()
     fetchContactInfo()
     fetchServices()
     if (activeTab === 'reviews') {
@@ -158,27 +153,6 @@ const AdminDashboard = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reviewFilters.search, activeTab])
-
-  const fetchPricing = async () => {
-    try {
-      const token = localStorage.getItem('adminToken')
-      const response = await axios.get('/api/admin/pricing', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-
-      if (response.data.success) {
-        setPricing(response.data.pricing)
-      }
-    } catch (error) {
-      if (error.response?.status === 401) {
-        localStorage.removeItem('adminToken')
-        localStorage.removeItem('adminUser')
-        navigate('/admin/login')
-      }
-    }
-  }
 
   const fetchContactInfo = async () => {
     try {
@@ -769,48 +743,6 @@ const AdminDashboard = () => {
     ))
   }
 
-  const handleEdit = (service) => {
-    setEditingId(service._id)
-    setEditValues({
-      pricePerSqft: service.pricePerSqft,
-      isActive: service.isActive,
-    })
-  }
-
-  const handleCancel = () => {
-    setEditingId(null)
-    setEditValues({})
-  }
-
-  const handleSave = async (id) => {
-    setLoading(true)
-    setMessage({ type: '', text: '' })
-
-    try {
-      const token = localStorage.getItem('adminToken')
-      const response = await axios.put(`/api/admin/pricing/${id}`, editValues, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-
-      if (response.data.success) {
-        setMessage({ type: 'success', text: 'Pricing updated successfully!' })
-        setEditingId(null)
-        fetchPricing()
-        setTimeout(() => setMessage({ type: '', text: '' }), 3000)
-      }
-    } catch (error) {
-      setMessage({
-        type: 'error',
-        text: error.response?.data?.message || 'Failed to update pricing',
-      })
-      setTimeout(() => setMessage({ type: '', text: '' }), 3000)
-    } finally {
-      setLoading(false)
-    }
-  }
-
   const handleContactSave = async () => {
     setLoading(true)
     setMessage({ type: '', text: '' })
@@ -858,8 +790,6 @@ const AdminDashboard = () => {
     switch (tab) {
       case 'services':
         return 'Services'
-      case 'pricing':
-        return 'Service Pricing'
       case 'contact':
         return 'Contact Information'
       case 'reviews':
@@ -897,7 +827,7 @@ const AdminDashboard = () => {
           className="mb-8"
         >
           <p className="text-gray-600 dark:text-gray-400 text-sm sm:text-base">
-            Manage service pricing, contact information, and customer reviews
+            Manage services, contact information, reviews, and gallery
           </p>
         </motion.div>
 
@@ -914,16 +844,6 @@ const AdminDashboard = () => {
               }`}
             >
               Services
-            </button>
-            <button
-              onClick={() => setActiveTab('pricing')}
-              className={`px-6 py-3 font-semibold transition-colors ${
-                activeTab === 'pricing'
-                  ? 'text-primary-600 dark:text-primary-400 border-b-2 border-primary-600 dark:border-primary-400'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400'
-              }`}
-            >
-              Service Pricing
             </button>
             <button
               onClick={() => setActiveTab('contact')}
@@ -966,7 +886,6 @@ const AdminDashboard = () => {
                 className="w-full px-4 py-3 pr-10 rounded-lg border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-semibold appearance-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               >
                 <option value="services">Services</option>
-                <option value="pricing">Service Pricing</option>
                 <option value="contact">Contact Information</option>
                 <option value="reviews">Reviews Management</option>
                 <option value="gallery">Gallery</option>
@@ -1408,134 +1327,6 @@ const AdminDashboard = () => {
           </motion.div>
         )}
 
-        {/* Pricing Tab */}
-        {activeTab === 'pricing' && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden"
-          >
-            <div className="overflow-x-auto -mx-4 sm:mx-0">
-              <table className="w-full min-w-[640px]">
-                <thead className="bg-primary-600 text-white">
-                  <tr>
-                    <th className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 text-left font-semibold text-sm sm:text-base">
-                      Service
-                    </th>
-                    <th className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 text-left font-semibold text-sm sm:text-base">
-                      Price per sqft (₹)
-                    </th>
-                    <th className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 text-left font-semibold text-sm sm:text-base">
-                      Status
-                    </th>
-                    <th className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 text-center font-semibold text-sm sm:text-base">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {pricing.map((service, index) => (
-                    <motion.tr
-                      key={service._id}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                      className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
-                    >
-                      <td className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 font-medium text-sm sm:text-base">
-                        {service.serviceName}
-                      </td>
-                      <td className="px-3 sm:px-4 md:px-6 py-3 sm:py-4">
-                        {editingId === service._id ? (
-                          <input
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            value={editValues.pricePerSqft}
-                            onChange={(e) =>
-                              setEditValues({
-                                ...editValues,
-                                pricePerSqft: parseFloat(e.target.value),
-                              })
-                            }
-                            className="w-24 sm:w-32 px-2 sm:px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-primary-500 text-sm sm:text-base"
-                          />
-                        ) : (
-                          <span className="flex items-center space-x-2">
-                            <FiDollarSign className="text-primary-600 dark:text-primary-400" />
-                            <span className="font-semibold">
-                              {service.pricePerSqft}
-                            </span>
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-3 sm:px-4 md:px-6 py-3 sm:py-4">
-                        {editingId === service._id ? (
-                          <select
-                            value={editValues.isActive}
-                            onChange={(e) =>
-                              setEditValues({
-                                ...editValues,
-                                isActive: e.target.value === 'true',
-                              })
-                            }
-                            className="px-2 sm:px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-primary-500 text-sm sm:text-base"
-                          >
-                            <option value="true">Active</option>
-                            <option value="false">Inactive</option>
-                          </select>
-                        ) : (
-                          <span
-                            className={`px-3 py-1 rounded-full text-sm font-medium ${
-                              service.isActive
-                                ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200'
-                                : 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200'
-                            }`}
-                          >
-                            {service.isActive ? 'Active' : 'Inactive'}
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-3 sm:px-4 md:px-6 py-3 sm:py-4">
-                        <div className="flex justify-center space-x-1 sm:space-x-2">
-                          {editingId === service._id ? (
-                            <>
-                              <button
-                                onClick={() => handleSave(service._id)}
-                                disabled={loading}
-                                className="p-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors disabled:opacity-50"
-                                title="Save"
-                              >
-                                <FiSave />
-                              </button>
-                              <button
-                                onClick={handleCancel}
-                                className="p-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors"
-                                title="Cancel"
-                              >
-                                <FiX />
-                              </button>
-                            </>
-                          ) : (
-                            <button
-                              onClick={() => handleEdit(service)}
-                              className="p-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors"
-                              title="Edit"
-                            >
-                              <FiEdit2 />
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </motion.tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </motion.div>
-        )}
-
         {/* Contact Information Tab */}
         {activeTab === 'contact' && (
           <motion.div
@@ -1849,14 +1640,6 @@ const AdminDashboard = () => {
               </div>
             </div>
           </motion.div>
-        )}
-
-        {pricing.length === 0 && activeTab === 'pricing' && (
-          <div className="text-center py-12">
-            <p className="text-gray-600 dark:text-gray-400">
-              No pricing data found. Please initialize pricing first.
-            </p>
-          </div>
         )}
 
         {/* Gallery Tab */}
