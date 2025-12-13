@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { FiLock, FiUser } from 'react-icons/fi'
 import axios from 'axios'
+import api from '../utils/api'
 
 const AdminLogin = () => {
   const [credentials, setCredentials] = useState({
@@ -27,7 +28,7 @@ const AdminLogin = () => {
     setError('')
 
     try {
-      const response = await axios.post('/api/admin/login', credentials)
+      const response = await api.post('/api/admin/login', credentials)
 
       if (response.data.success) {
         localStorage.setItem('adminToken', response.data.token)

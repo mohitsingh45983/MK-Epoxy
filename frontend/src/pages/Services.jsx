@@ -9,6 +9,7 @@ import {
   FiArrowRight,
 } from 'react-icons/fi'
 import axios from 'axios'
+import api from '../utils/api'
 
 const Services = () => {
   const [services, setServices] = useState([])
@@ -20,7 +21,7 @@ const Services = () => {
       setLoading(true)
       setError('')
       try {
-        const res = await axios.get('/api/services')
+        const res = await api.get('/api/services')
         if (res.data.success) {
           setServices(res.data.services || [])
         } else {

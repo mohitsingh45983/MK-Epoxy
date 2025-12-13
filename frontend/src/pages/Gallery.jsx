@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Navigation, Pagination, Autoplay } from 'swiper/modules'
 import axios from 'axios'
+import api from '../utils/api'
 import 'swiper/css'
 import 'swiper/css/navigation'
 import 'swiper/css/pagination'
@@ -21,7 +22,7 @@ const Gallery = () => {
       setLoading(true)
       setError('')
       try {
-        const res = await axios.get('/api/gallery')
+        const res = await api.get('/api/gallery')
         if (res.data.success) {
           setImages(res.data.images || [])
           setBeforeAfter(res.data.beforeAfter || [])

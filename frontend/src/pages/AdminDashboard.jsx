@@ -22,6 +22,7 @@ import {
 } from 'react-icons/fi'
 import { FaStar } from 'react-icons/fa'
 import axios from 'axios'
+import api from '../utils/api'
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('services') // services, contact, reviews, gallery
@@ -157,7 +158,7 @@ const AdminDashboard = () => {
   const fetchContactInfo = async () => {
     try {
       const token = localStorage.getItem('adminToken')
-      const response = await axios.get('/api/admin/contact', {
+      const response = await api.get('/api/admin/contact', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -208,7 +209,7 @@ const AdminDashboard = () => {
         return
       }
 
-      const response = await axios.get('/api/admin/services', {
+      const response = await api.get('/api/admin/services', {
         headers: { Authorization: `Bearer ${token}` },
       })
 
@@ -256,7 +257,7 @@ const AdminDashboard = () => {
       params.append('sortBy', reviewFilters.sortBy)
       params.append('sortOrder', reviewFilters.sortOrder)
 
-      const response = await axios.get(
+      const response = await api.get(
         `/api/admin/reviews?${params.toString()}`,
         {
           headers: {
@@ -325,10 +326,10 @@ const AdminDashboard = () => {
       }
 
       const [imagesRes, beforeAfterRes] = await Promise.all([
-        axios.get('/api/admin/gallery/images', {
+        api.get('/api/admin/gallery/images', {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        axios.get('/api/admin/gallery/before-after', {
+        api.get('/api/admin/gallery/before-after', {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ])
@@ -369,7 +370,7 @@ const AdminDashboard = () => {
       formData.append('description', galleryForm.description)
       formData.append('image', galleryForm.image)
 
-      const res = await axios.post('/api/admin/gallery/images', formData, {
+      const res = await api.post('/api/admin/gallery/images', formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data',
@@ -412,7 +413,7 @@ const AdminDashboard = () => {
       formData.append('before', beforeAfterForm.before)
       formData.append('after', beforeAfterForm.after)
 
-      const res = await axios.post(
+      const res = await api.post(
         '/api/admin/gallery/before-after',
         formData,
         {
@@ -454,7 +455,7 @@ const AdminDashboard = () => {
     setGalleryLoading(true)
     try {
       const token = localStorage.getItem('adminToken')
-      await axios.delete(`/api/admin/gallery/images/${id}`, {
+      await api.delete(`/api/admin/gallery/images/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       setMessage({ type: 'success', text: 'Image deleted.' })
@@ -477,7 +478,7 @@ const AdminDashboard = () => {
     setGalleryLoading(true)
     try {
       const token = localStorage.getItem('adminToken')
-      await axios.delete(`/api/admin/gallery/before-after/${id}`, {
+      await api.delete(`/api/admin/gallery/before-after/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       setMessage({ type: 'success', text: 'Before/After deleted.' })
@@ -523,7 +524,7 @@ const AdminDashboard = () => {
       const token = localStorage.getItem('adminToken')
       const formData = buildServiceFormData(serviceForm)
 
-      const res = await axios.post('/api/admin/services', formData, {
+      const res = await api.post('/api/admin/services', formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data',
@@ -588,7 +589,7 @@ const AdminDashboard = () => {
       const token = localStorage.getItem('adminToken')
       const formData = buildServiceFormData(serviceEditValues)
 
-      const res = await axios.put(
+      const res = await api.put(
         `/api/admin/services/${editingServiceId}`,
         formData,
         {
@@ -627,7 +628,7 @@ const AdminDashboard = () => {
     setServicesLoading(true)
     try {
       const token = localStorage.getItem('adminToken')
-      const res = await axios.delete(`/api/admin/services/${id}`, {
+      const res = await api.delete(`/api/admin/services/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       if (res.data.success) {
@@ -655,7 +656,7 @@ const AdminDashboard = () => {
     setLoading(true)
     try {
       const token = localStorage.getItem('adminToken')
-      const response = await axios.put(
+      const response = await api.put(
         `/api/admin/reviews/${id}/verify`,
         { verified },
         {
@@ -702,7 +703,7 @@ const AdminDashboard = () => {
     setLoading(true)
     try {
       const token = localStorage.getItem('adminToken')
-      const response = await axios.delete(`/api/admin/reviews/${id}`, {
+      const response = await api.delete(`/api/admin/reviews/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -749,7 +750,7 @@ const AdminDashboard = () => {
 
     try {
       const token = localStorage.getItem('adminToken')
-      const response = await axios.put(
+      const response = await api.put(
         '/api/admin/contact',
         contactEditValues,
         {

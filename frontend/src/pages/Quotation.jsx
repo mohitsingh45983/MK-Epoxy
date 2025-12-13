@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { FiUpload, FiCheckCircle, FiX } from 'react-icons/fi'
 import axios from 'axios'
+import api from '../utils/api'
 
 const Quotation = () => {
   const [formData, setFormData] = useState({
@@ -22,7 +23,7 @@ const Quotation = () => {
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const res = await axios.get('/api/services')
+        const res = await api.get('/api/services')
         if (res.data.success) {
           setServices(res.data.services || [])
         }
@@ -68,7 +69,7 @@ const Quotation = () => {
         formDataToSend.append('images', image)
       })
 
-      const response = await axios.post('/api/quotation', formDataToSend, {
+      const response = await api.post('/api/quotation', formDataToSend, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

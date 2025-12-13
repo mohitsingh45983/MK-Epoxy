@@ -5,6 +5,7 @@ import { FiPhone, FiFileText } from 'react-icons/fi'
 import { FaWhatsapp as FaWhatsappSolid } from 'react-icons/fa'
 import { FiCheckCircle, FiAward, FiUsers } from 'react-icons/fi'
 import axios from 'axios'
+import api from '../utils/api'
 
 const Home = () => {
   const [contactInfo, setContactInfo] = useState({
@@ -20,7 +21,7 @@ const Home = () => {
 
   const fetchContactInfo = async () => {
     try {
-      const response = await axios.get('/api/contact-info')
+      const response = await api.get('/api/contact-info')
       if (response.data.success) {
         setContactInfo(response.data.contactInfo)
       }
@@ -31,7 +32,7 @@ const Home = () => {
 
   const fetchServices = async () => {
     try {
-      const response = await axios.get('/api/services')
+      const response = await api.get('/api/services')
       if (response.data.success) {
         setServices(response.data.services || [])
       }

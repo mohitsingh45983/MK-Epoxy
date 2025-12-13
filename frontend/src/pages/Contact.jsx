@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { FiPhone, FiMail, FiMapPin, FiClock } from 'react-icons/fi'
 import { FaWhatsapp } from 'react-icons/fa'
 import axios from 'axios'
+import api from '../utils/api'
 
 const Contact = () => {
   const [contactInfo, setContactInfo] = useState(null)
@@ -14,7 +15,7 @@ const Contact = () => {
 
   const fetchContactInfo = async () => {
     try {
-      const response = await axios.get('/api/contact-info')
+      const response = await api.get('/api/contact-info')
       if (response.data.success) {
         setContactInfo(response.data.contactInfo)
       }

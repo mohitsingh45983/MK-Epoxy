@@ -5,6 +5,7 @@ import { FiCheckCircle, FiX } from 'react-icons/fi'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Navigation, Pagination, Autoplay } from 'swiper/modules'
 import axios from 'axios'
+import api from '../utils/api'
 import 'swiper/css'
 import 'swiper/css/navigation'
 import 'swiper/css/pagination'
@@ -32,7 +33,7 @@ const Reviews = () => {
 
   const fetchReviews = async () => {
     try {
-      const response = await axios.get('/api/reviews')
+      const response = await api.get('/api/reviews')
       if (response.data.success) {
         setReviews(response.data.reviews)
       }
@@ -45,7 +46,7 @@ const Reviews = () => {
 
   const fetchStats = async () => {
     try {
-      const response = await axios.get('/api/reviews/stats')
+      const response = await api.get('/api/reviews/stats')
       if (response.data.success) {
         setAverageRating(response.data.averageRating || 5.0)
         setTotalReviews(response.data.totalReviews || 0)
@@ -92,7 +93,7 @@ const Reviews = () => {
         payload.append('image', formData.image)
       }
 
-      const response = await axios.post('/api/reviews', payload, {
+      const response = await api.post('/api/reviews', payload, {
         headers: { 'Content-Type': 'multipart/form-data' },
       })
       if (response.data.success) {
