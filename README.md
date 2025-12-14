@@ -1,14 +1,5 @@
 # MK Epoxy - Premium Waterproofing & Epoxy Flooring Website
 
-A modern, premium website for MK Epoxy - a waterproofing and epoxy flooring company. Built with React, MongoDB, and Express.
-
-## Monorepo Layout
-
-- `frontend/` - Vite/React marketing site and admin UI
-- `backend/` - Express/MongoDB API, uploads, and seed scripts
-
-Each side has its own `package.json` and dependencies. Install and run them separately as noted below.
-
 ## Features
 
 - 🏠 **Home Page** - Hero banner with company branding, highlights, and service preview
