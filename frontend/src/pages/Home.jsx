@@ -152,45 +152,6 @@ const Home = () => {
         </motion.div>
       </section>
 
-      {/* Highlights Section */}
-      <section className="section-padding bg-gray-50 dark:bg-gray-800">
-        <div className="container-custom">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-12"
-          >
-            <h2 className="text-4xl font-bold mb-4">Why Choose Us?</h2>
-            <p className="text-lg text-gray-600 dark:text-gray-400">
-              Excellence in every project we undertake
-            </p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {highlights.map((highlight, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: index * 0.2 }}
-                className="bg-white dark:bg-gray-900 p-6 sm:p-8 rounded-xl shadow-lg hover:shadow-2xl transition-shadow text-center"
-              >
-                <div className="text-primary-600 dark:text-primary-400 mb-3 sm:mb-4 flex justify-center">
-                  {highlight.icon}
-                </div>
-                <h3 className="text-xl sm:text-2xl font-bold mb-2 sm:mb-3">{highlight.title}</h3>
-                <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
-                  {highlight.description}
-                </p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Services Preview */}
       <section className="section-padding">
         <div className="container-custom">
@@ -250,6 +211,45 @@ const Home = () => {
               </div>
             </>
           )}
+        </div>
+      </section>
+
+      {/* Highlights Section */}
+      <section className="section-padding bg-gray-50 dark:bg-gray-800">
+        <div className="container-custom">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-12"
+          >
+            <h2 className="text-4xl font-bold mb-4">Why Choose Us?</h2>
+            <p className="text-lg text-gray-600 dark:text-gray-400">
+              Excellence in every project we undertake
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {highlights.map((highlight, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: index * 0.2 }}
+                className="bg-white dark:bg-gray-900 p-6 sm:p-8 rounded-xl shadow-lg hover:shadow-2xl transition-shadow text-center"
+              >
+                <div className="text-primary-600 dark:text-primary-400 mb-3 sm:mb-4 flex justify-center">
+                  {highlight.icon}
+                </div>
+                <h3 className="text-xl sm:text-2xl font-bold mb-2 sm:mb-3">{highlight.title}</h3>
+                <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
+                  {highlight.description}
+                </p>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
     </div>
