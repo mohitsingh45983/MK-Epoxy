@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Navigation, Pagination, Autoplay } from 'swiper/modules'
-import axios from 'axios'
 import api from '../utils/api'
 import 'swiper/css'
 import 'swiper/css/navigation'
@@ -17,6 +16,10 @@ const Gallery = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
+  /* ✅ Pagination */
+  const IMAGES_PER_PAGE = 12
+  const [currentPage, setCurrentPage] = useState(1)
+
   useEffect(() => {
     const fetchGallery = async () => {
       setLoading(true)
@@ -29,7 +32,7 @@ const Gallery = () => {
         } else {
           setError('Failed to load gallery.')
         }
-      } catch (err) {
+      } catch {
         setError('Cannot load gallery right now. Please try again later.')
       } finally {
         setLoading(false)
@@ -39,14 +42,21 @@ const Gallery = () => {
     fetchGallery()
   }, [])
 
+  const totalPages = Math.ceil(images.length / IMAGES_PER_PAGE)
+  const startIndex = (currentPage - 1) * IMAGES_PER_PAGE
+  const paginatedImages = images.slice(
+    startIndex,
+    startIndex + IMAGES_PER_PAGE
+  )
+
+  /* ✅ Lightbox */
   const openLightbox = (index) => {
-    setSelectedImage(images[index])
-    setCurrentIndex(index)
+    const actualIndex = startIndex + index
+    setSelectedImage(images[actualIndex])
+    setCurrentIndex(actualIndex)
   }
 
-  const closeLightbox = () => {
-    setSelectedImage(null)
-  }
+  const closeLightbox = () => setSelectedImage(null)
 
   const nextImage = () => {
     const next = (currentIndex + 1) % images.length
@@ -62,26 +72,17 @@ const Gallery = () => {
 
   return (
     <div className="pt-20">
-      {/* Hero Section */}
+      {/* Hero */}
       <section className="section-padding bg-gradient-to-br from-primary-50 to-primary-100 dark:from-gray-900 dark:to-gray-800">
-        <div className="container-custom">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-center"
-          >
-            <h1 className="text-5xl md:text-6xl font-bold mb-6">
-              Project Gallery
-            </h1>
-            <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
-              Showcasing our completed projects and quality workmanship
-            </p>
-          </motion.div>
+        <div className="container-custom text-center">
+          <h1 className="text-5xl md:text-6xl font-bold mb-6">Project Gallery</h1>
+          <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
+            Showcasing our completed projects and quality workmanship
+          </p>
         </div>
       </section>
 
-      {/* Image Gallery Grid */}
+      {/* Gallery */}
       <section className="section-padding">
         <div className="container-custom">
           {error && (
@@ -89,37 +90,55 @@ const Gallery = () => {
               {error}
             </div>
           )}
+
           {loading ? (
             <div className="text-center text-gray-500">Loading gallery...</div>
-          ) : images.length === 0 ? (
-            <div className="text-center text-gray-500">
-              No gallery images yet.
-            </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {images.map((image, index) => (
-                <motion.div
-                  key={image._id || index}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: index * 0.05 }}
-                  className="relative overflow-hidden rounded-lg cursor-pointer group"
-                  onClick={() => openLightbox(index)}
-                >
-                  <img
-                    src={image.imageUrl}
-                    alt={image.title || `Project ${index + 1}`}
-                    className="w-full h-40 sm:h-48 md:h-56 lg:h-64 object-cover transition-transform duration-300 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300 flex items-center justify-center">
-                    <span className="text-white opacity-0 group-hover:opacity-100 transition-opacity">
-                      View Full Size
-                    </span>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {paginatedImages.map((image, index) => (
+                  <motion.div
+                    key={image._id || index}
+                    whileHover={{ scale: 1.05 }}
+                    className="relative overflow-hidden rounded-lg cursor-pointer"
+                    onClick={() => openLightbox(index)}
+                  >
+                    <img
+                      src={image.imageUrl}
+                      alt={image.title || 'Project'}
+                      className="w-full h-48 object-cover"
+                    />
+                  </motion.div>
+                ))}
+              </div>
+
+              {/*Arrow Pagination */}
+              {images.length > IMAGES_PER_PAGE && (
+                <div className="flex justify-center items-center gap-8 mt-10">
+                  <button
+                    onClick={() =>
+                      setCurrentPage((p) => Math.max(1, p - 1))
+                    }
+                    disabled={currentPage === 1}
+                    className="p-3 rounded-full bg-gray-200 dark:bg-gray-800 disabled:opacity-40"
+                  >
+                    <FiChevronLeft size={28} />
+                  </button>
+
+                  <button
+                    onClick={() =>
+                      setCurrentPage((p) =>
+                        Math.min(totalPages, p + 1)
+                      )
+                    }
+                    disabled={currentPage === totalPages}
+                    className="p-3 rounded-full bg-gray-200 dark:bg-gray-800 disabled:opacity-40"
+                  >
+                    <FiChevronRight size={28} />
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </section>
@@ -237,6 +256,8 @@ const Gallery = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+
     </div>
   )
 }
