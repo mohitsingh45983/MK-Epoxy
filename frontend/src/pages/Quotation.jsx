@@ -4,6 +4,8 @@ import { FiUpload, FiCheckCircle, FiX } from 'react-icons/fi'
 import axios from 'axios'
 import api from '../utils/api'
 
+const ENABLE_IMAGE_UPLOAD = false
+
 const Quotation = () => {
   const [formData, setFormData] = useState({
     name: '',
@@ -115,7 +117,7 @@ const Quotation = () => {
               Get Your Free Quotation
             </h1>
             <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
-              Fill out the form below and receive an estimate within 5 minutes
+              Fill out the form below and receive an estimate shortly
             </p>
           </motion.div>
         </div>
@@ -170,7 +172,7 @@ const Quotation = () => {
                           ₹{estimate.basePricePerSqft}
                         </span>
                       </div>
-                      <div className="flex justify-between border-t border-gray-300 dark:border-gray-600 pt-2">
+                      {/* <div className="flex justify-between border-t border-gray-300 dark:border-gray-600 pt-2">
                         <span className="text-gray-600 dark:text-gray-400">
                           Subtotal:
                         </span>
@@ -193,13 +195,15 @@ const Quotation = () => {
                         <span className="font-semibold">
                           ₹{estimate.gst.toLocaleString()}
                         </span>
-                      </div>
+                      </div> */}
                       <div className="flex justify-between border-t-2 border-primary-600 dark:border-primary-400 pt-3 mt-3">
                         <span className="text-xl font-bold">
                           Total Estimate:
                         </span>
                         <span className="text-2xl font-bold text-primary-600 dark:text-primary-400">
-                          ₹{estimate.total.toLocaleString()}
+                          ₹{estimate.subtotal.toLocaleString()} 
+                          {/* i have changed the total estimate to subtotal
+                          because we don't have any overhead and GST */}
                         </span>
                       </div>
                     </div>
@@ -208,7 +212,7 @@ const Quotation = () => {
                       based on site conditions and requirements.
                     </p>
                     <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center">
-                      We'll contact you within 5 minutes with a detailed
+                      We'll contact you shortly with a detailed
                       quotation.
                     </p>
                   </div>
@@ -371,10 +375,12 @@ const Quotation = () => {
                 />
               </div>
 
+              {ENABLE_IMAGE_UPLOAD && (
               <div>
                 <label className="block text-sm font-semibold mb-2">
                   Upload Images (Max 5 images)
                 </label>
+
                 <div className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-6 text-center">
                   <input
                     type="file"
@@ -422,6 +428,8 @@ const Quotation = () => {
                   </div>
                 )}
               </div>
+)}
+
 
               <button
                 type="submit"

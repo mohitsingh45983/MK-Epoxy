@@ -48,8 +48,7 @@ const upload = multer({
 // Calculate quotation estimate using service rate
 async function calculateEstimate(service, area) {
   const areaNum = parseFloat(area) || 0
-  
-  // Get rate from Service model
+
   const serviceDoc = await Service.findOne({
     title: service,
     isActive: true,
@@ -58,22 +57,12 @@ async function calculateEstimate(service, area) {
   const basePrice = serviceDoc?.ratePerSqft ?? 80
   const subtotal = areaNum * basePrice
 
-  // Add 10% for labor and materials overhead
-  const overhead = subtotal * 0.1
-
-  // Add 18% GST
-  const gst = (subtotal + overhead) * 0.18
-
-  const total = subtotal + overhead + gst
-
   return {
     service,
     area: areaNum,
     basePricePerSqft: basePrice,
     subtotal: Math.round(subtotal),
-    overhead: Math.round(overhead),
-    gst: Math.round(gst),
-    total: Math.round(total),
+    total: Math.round(subtotal),
     currency: 'INR',
   }
 }
@@ -99,11 +88,11 @@ router.post('/', upload.array('images', 5), async (req, res) => {
       area,
       message,
       images: imagePaths,
-      estimate: estimate.total, // Store estimated total
+      estimate: estimate.subtotal, // Store estimated total
     })
 
     await quotation.save()
-
+    
     // Send email notification (optional)
     if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
       try {
@@ -116,8 +105,9 @@ router.post('/', upload.array('images', 5), async (req, res) => {
         })
 
         const mailOptions = {
-          from: process.env.EMAIL_USER,
-          to: process.env.ADMIN_EMAIL || process.env.EMAIL_USER,
+          from: process.env.EMAIL_USER,      // owner@gmail.com
+          to: process.env.ADMIN_EMAIL,        // owner@gmail.com
+          replyTo: email,                     // customer's email
           subject: `New Quotation Request from ${name}`,
           html: `
             <h2>New Quotation Request</h2>
@@ -128,14 +118,8 @@ router.post('/', upload.array('images', 5), async (req, res) => {
             <p><strong>Service:</strong> ${service}</p>
             <p><strong>Area:</strong> ${area} sqft</p>
             <p><strong>Message:</strong> ${message || 'N/A'}</p>
-            ${
-              imagePaths.length > 0
-                ? `<p><strong>Images:</strong> ${imagePaths.length} uploaded</p>`
-                : ''
-            }
           `,
         }
-
         await transporter.sendMail(mailOptions)
       } catch (emailError) {
         console.error('Email sending error:', emailError)
