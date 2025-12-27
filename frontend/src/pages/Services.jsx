@@ -54,8 +54,7 @@ const Services = () => {
               Our Services
             </h1>
             <p className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto px-4">
-              Each service has a dedicated page with detailed scope, benefits,
-              pricing, and process steps.
+            Transforming spaces with advanced materials and expert craftsmanship.
             </p>
           </motion.div>
         </div>
@@ -114,7 +113,7 @@ const Services = () => {
                     {service.ratePerSqft !== undefined && (
                       <div className="bg-primary-50 dark:bg-gray-800 text-primary-700 dark:text-primary-300 px-3 py-2 rounded-lg text-sm font-semibold inline-flex items-center space-x-1">
                         <FiTrendingUp />
-                        <span>₹{service.ratePerSqft}/sqft</span>
+                        <span>₹{service.ratePerSqft}/sqft/unit</span>
                       </div>
                     )}
                   </div>

@@ -129,7 +129,7 @@ const ServiceDetail = () => {
               {service.ratePerSqft !== undefined && (
                 <div className="flex items-center justify-between">
                   <span className="text-gray-600 dark:text-gray-400">
-                    Rate per sqft
+                    Rate per sqft/unit
                   </span>
                   <span className="text-2xl font-bold text-primary-600 dark:text-primary-400">
                     ₹{service.ratePerSqft}
