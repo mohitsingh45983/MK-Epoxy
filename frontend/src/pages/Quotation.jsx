@@ -150,6 +150,38 @@ const Quotation = () => {
                     <div className="space-y-3">
                       <div className="flex justify-between">
                         <span className="text-gray-600 dark:text-gray-400">
+                          Name:
+                        </span>
+                        <span className="font-semibold">
+                          {estimate.name}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600 dark:text-gray-400">
+                          Phone:
+                        </span>
+                        <span className="font-semibold">
+                          {estimate.phone}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600 dark:text-gray-400">
+                          Email:
+                        </span>
+                        <span className="font-semibold">
+                          {estimate.email}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600 dark:text-gray-400">
+                          Location:
+                        </span>
+                        <span className="font-semibold">
+                          {estimate.location}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600 dark:text-gray-400">
                           Service:
                         </span>
                         <span className="font-semibold">
@@ -170,6 +202,14 @@ const Quotation = () => {
                         </span>
                         <span className="font-semibold">
                           ₹{estimate.basePricePerSqft}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600 dark:text-gray-400">
+                          Message:
+                        </span>
+                        <span className="font-semibold">
+                          {estimate.message}
                         </span>
                       </div>
                       {/* <div className="flex justify-between border-t border-gray-300 dark:border-gray-600 pt-2">

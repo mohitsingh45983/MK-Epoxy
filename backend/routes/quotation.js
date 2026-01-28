@@ -46,7 +46,7 @@ const upload = multer({
 })
 
 // Calculate quotation estimate using service rate
-async function calculateEstimate(service, area) {
+async function calculateEstimate(service,area) {
   const areaNum = parseFloat(area) || 0
 
   const serviceDoc = await Service.findOne({
@@ -77,7 +77,17 @@ router.post('/', upload.array('images', 5), async (req, res) => {
       : []
 
     // Calculate estimate
-    const estimate = await calculateEstimate(service, area)
+    const pricing = await calculateEstimate(service, area)
+
+    const estimate = {
+      name,
+      phone,
+      email,
+      location,
+      message,
+      ...pricing,
+    }
+    
 
     const quotation = new Quotation({
       name,
