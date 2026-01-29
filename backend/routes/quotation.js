@@ -104,38 +104,44 @@ router.post('/', upload.array('images', 5), async (req, res) => {
     await quotation.save()
     
     // Send email notification (optional)
-    if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-      try {
-        const transporter = nodemailer.createTransport({
-          service: 'gmail',
-          auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS,
-          },
-        })
+// Send email notification (optional)
+if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+  try {
+    const transporter = nodemailer.createTransport({
+      host: "smtp.gmail.com",
+      port: 587,
+      secure: false,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+      tls: { rejectUnauthorized: false }
+    });
 
-        const mailOptions = {
-          from: process.env.EMAIL_USER,      // owner@gmail.com
-          to: process.env.ADMIN_EMAIL,        // owner@gmail.com
-          replyTo: email,                     // customer's email
-          subject: `New Quotation Request from ${name}`,
-          html: `
-            <h2>New Quotation Request</h2>
-            <p><strong>Name:</strong> ${name}</p>
-            <p><strong>Phone:</strong> ${phone}</p>
-            <p><strong>Email:</strong> ${email}</p>
-            <p><strong>Location:</strong> ${location}</p>
-            <p><strong>Service:</strong> ${service}</p>
-            <p><strong>Area:</strong> ${area} sqft</p>
-            <p><strong>Message:</strong> ${message || 'N/A'}</p>
-          `,
-        }
-        await transporter.sendMail(mailOptions)
-      } catch (emailError) {
-        console.error('Email sending error:', emailError)
-        // Don't fail the request if email fails
-      }
-    }
+    const mailOptions = {
+      from: `"MK Epoxy" <${process.env.EMAIL_USER}>`,
+      to: process.env.ADMIN_EMAIL,
+      replyTo: email,
+      subject: `New Quotation Request from ${name}`,
+      html: `
+        <h2>New Quotation Request</h2>
+        <p><strong>Name:</strong> ${name}</p>
+        <p><strong>Phone:</strong> ${phone}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Location:</strong> ${location}</p>
+        <p><strong>Service:</strong> ${service}</p>
+        <p><strong>Area:</strong> ${area} sqft</p>
+        <p><strong>Message:</strong> ${message || 'N/A'}</p>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log("Email sent successfully ✅");
+  } catch (emailError) {
+    console.error("Email sending error ❌", emailError);
+  }
+}
+
 
     res.status(201).json({
       success: true,
